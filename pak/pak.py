@@ -1,0 +1,2 @@
+def pak():
+    print("lol")
