@@ -1,2 +1,2 @@
-def pak():
+def test):
     print("lol")
