@@ -14,12 +14,20 @@
 #    url='https://github.com/justayak/pppr'
 #)
 
-from setuptools import setup, find_packages
+#from setuptools import setup, find_packages
 
-print("PACKAGES:",find_packages())
+#print("PACKAGES:",find_packages())
+
+#setup(
+#    name="pak",
+#    version="0.0.3",
+#    packages=find_packages(),
+#)
+
+from distutils.core import setup
 
 setup(
     name="pak",
-    version="0.0.2",
-    packages=find_packages(),
+    version="0.0.1",
+    packages=["pak"],
 )
