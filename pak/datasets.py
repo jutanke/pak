@@ -15,6 +15,7 @@ class Dataset:
     def __init__(self, name, root, verbose=True):
         self.name = name
         self.root = root
+        self.root_export = root
         self.verbose = verbose
         if not exists(root):
             makedirs(root)
@@ -29,13 +30,17 @@ class Dataset:
             utils.talk("could not find folder " + dest + "...", self.verbose)
             fzip = join(self.root, self.name + ".zip")
 
+            print("NAME::", fzip)
             if not isfile(fzip):
                 utils.talk("could not find file " + fzip, self.verbose)
+                utils.talk("download from " + url, self.verbose)
                 with urllib.request.urlopen(url) as res, open(fzip, 'wb') as f:
+                    utils.talk(url + " downloaded..", self.verbose)
                     shutil.copyfileobj(res, f)
-                zip_ref = zipfile.ZipFile(fzip, 'r')
-                zip_ref.extractall(self.root)
-                zip_ref.close()
+            zip_ref = zipfile.ZipFile(fzip, 'r')
+            utils.talk("unzip " + fzip + " -> " + self.root, self.verbose)
+            zip_ref.extractall(self.root_export)
+            zip_ref.close()
 
 
 # =========================================
@@ -47,6 +52,7 @@ class MOT16(Dataset):
     def __init__(self, root, verbose=True):
         Dataset.__init__(self, "MOT16", root, verbose)
         url = 'https://motchallenge.net/data/MOT16.zip'
+        self.root_export = join(root, "MOT16")
         self.download_and_unzip(url)
 
 
