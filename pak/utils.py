@@ -8,6 +8,15 @@ from PIL import Image
 from os.path import join, isfile, exists
 
 
+def bb_to_plt_plot(x, y, w, h):
+    """ Converts a bounding box to parameters
+        for a plt.plot([..], [..])
+        for actual plotting with pyplot
+    """
+    X = [x, x,   x+w, x+w, x]
+    Y = [y, y+h, y+h, y,   y]
+    return X, Y
+
 def extract_eq(data, col, value):
     """ extract all rows from the data table
         where the values of the column = value
