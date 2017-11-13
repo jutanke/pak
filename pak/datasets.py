@@ -58,15 +58,14 @@ class Dataset:
 
 
 # =========================================
-#  MOT16
+#  MOTXX
 # =========================================
 
-class MOT16(Dataset):
+class MOT_X(Dataset):
 
-    def __init__(self, root, verbose=True, resize=None):
-        Dataset.__init__(self, "MOT16", root, verbose)
-        url = 'https://motchallenge.net/data/MOT16.zip'
-        self.root_export = join(root, "MOT16")
+    def __init__(self, root, root_export, name, url, verbose=True, resize=None):
+        Dataset.__init__(self, name, root, verbose)
+        self.root_export = root_export
         self.download_and_unzip(url)
         self.resize = resize
 
@@ -74,9 +73,6 @@ class MOT16(Dataset):
         """ impl
         """
         return 1, 2
-
-    def get_train_folders(self):
-        return ["MOT16-02", "MOT16-04"]
 
     def label_id_to_class(self, label_id):
         """ converts the label number id to
@@ -113,7 +109,6 @@ class MOT16(Dataset):
         utils.talk('MOT16 X loaded', self.verbose)
 
         # Y-det
-
         det_txt = join(join(loc, "det"), 'det.txt')
         Y_det = np.loadtxt(det_txt, delimiter=',')
         utils.talk('MOT16 Y_det loaded', self.verbose)
@@ -124,3 +119,61 @@ class MOT16(Dataset):
         utils.talk('MOT16 Y_gt loaded', self.verbose)
 
         return X, Y_det, Y_gt
+
+
+    def get_train_folders(self):
+        raise NotImplementedError("Must be overriden")
+
+
+# =========================================
+#  MOT16
+# =========================================
+
+class MOT16(MOT_X):
+    """ MOT16 dataset
+    """
+
+    def __init__(self, root, verbose=True, resize=None):
+        root_export = join(root, "MOT16")
+        MOT_X.__init__(self, root, root_export, "MOT16",
+                "https://motchallenge.net/data/MOT16.zip", verbose, resize)
+
+
+    def get_train_folders(self):
+        return ["MOT16-02", "MOT16-04"]
+
+
+# =========================================
+#  MOT15
+# =========================================
+
+class MOT152D(MOT_X):
+    """ MOT15 2d dataset
+    """
+
+    def __init__(self, root, verbose=True, resize=None):
+        MOT_X.__init__(self, root, root, "2DMOT2015",
+                "https://motchallenge.net/data/2DMOT2015.zip", verbose, resize)
+
+
+# =========================================
+#  MARKET 1501
+# =========================================
+
+class Market1501(Dataset):
+    """ Market1501 dataset
+    """
+
+    def __init__(self, root):
+        Dataset.__init__(self, "Market-1501-v15.09.15", root, verbose)
+
+# =========================================
+#  CUHK03
+# =========================================
+
+class cuhk03(Dataset):
+    """ cuhk03 dataset
+    """
+
+    def __init__(self, root):
+        Dataset.__init__(self, "cuhk03_release", root, verbose)
