@@ -8,6 +8,24 @@ from PIL import Image
 from os.path import join, isfile, exists
 
 
+def extract_eq(data, col, value):
+    """ extract all rows from the data table
+        where the values of the column = value
+
+        data must be a 2d matrix:
+        shape: (rows, columns)
+
+            col1 col2 col3 ...
+        row1
+        row2
+        row3
+        ...
+
+    """
+    mask = ((data[:,col] == value) * 1).nonzero()[0]
+    return data[mask,:]
+
+
 def talk(text, verbose):
     """ helper function for printing debug messages
     """
