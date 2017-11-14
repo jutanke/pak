@@ -56,6 +56,8 @@ X, Y = m1501.get_train_raw()
 
 # References
 
+[0] Milk-Icon: Icon made by Smashicons from www.flaticon.com
+
 [1] Milan, Anton, et al. "MOT16: A benchmark for multi-object tracking." arXiv preprint arXiv:1603.00831 (2016)
 
 [2] Leal-Taixé, Laura, et al. "Motchallenge 2015: Towards a benchmark for multi-target tracking." arXiv preprint arXiv:1504.01942 (2015).
