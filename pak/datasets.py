@@ -177,7 +177,12 @@ class MOT16(MOT_X):
 
 
     def get_train_folders(self):
-        return ["MOT16-02", "MOT16-04"]
+        return ["MOT16-02", "MOT16-04", "MOT16-05", "MOT16-09", \
+            "MOT16-10", "MOT16-11", "MOT16-13"]
+
+    def get_test_folders(self):
+        return ["MOT16-01", "MOT16-03", "MOT16-06", "MOT16-07", \
+            "MOT16-08", "MOT16-12", "MOT16-14"]
 
 
 # =========================================
