@@ -52,6 +52,7 @@ This means that you must attribute the work in the manner specified by the autho
 ### Market-1501
 [3]Person re-identitification dataset collected in front of a supermarket from six different cameras. The dataset
 contains 1501 different identities that are captured by at least two cameras.
+[Sample code](https://github.com/justayak/pak/blob/master/samples/Market1501.ipynb)
 
 ```python
 from pak import datasets
