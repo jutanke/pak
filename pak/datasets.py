@@ -247,7 +247,7 @@ class Market1501(Dataset):
 
         Y = np.vstack((identities, cameras, sequences, frames))
 
-        return X, Y
+        return X, np.rollaxis(Y, 1)
 
 
 
