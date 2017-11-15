@@ -274,7 +274,8 @@ class cuhk03(Dataset):
         Ids = []
 
         for view in range(n):
-            utils.talk("cuhk03: view " + str(view+1) + "/" + str(n), self.verbose)
+            utils.talk("cuhk03: view \"" + folder + "\" " + \
+                str(view+1) + "/" + str(n), self.verbose)
             V = f[data[0][view]]
             ten, M = V.shape  # M is number of identities
             for i in range(M):
@@ -283,10 +284,10 @@ class cuhk03(Dataset):
                     if len(img.shape) == 3:
                         img = np.swapaxes(img, 0, 2)
                         img = resize(img, (th, tw), mode='constant')
-                        Imgs.append(img)
+                        Imgs.append((img * 255).astype('uint8'))
                         Ids.append(current_id)
                 current_id += 1
 
         X = np.array(Imgs)
-        Y = np.array(Ids, 'uint32')
+        Y = np.array(Ids, 'int32')
         return X, Y
