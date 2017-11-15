@@ -8,6 +8,7 @@ load common datasets.
 ### MOT16
 [Dataset](https://motchallenge.net/)[1] with 14 video sequences (7 train, 7 test) in unconstrained environments with both static and moving cameras.
 Tracking + evaluation is done in image coordinates.
+[Sample code](https://github.com/justayak/pak/blob/master/samples/MOT16.ipynb)
 
 ```python
 from pak import datasets
