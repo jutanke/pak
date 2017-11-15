@@ -95,24 +95,6 @@ class MOT_X(Dataset):
         """
         return 1, 2
 
-    def label_id_to_class(self, label_id):
-        """ converts the label number id to
-            the true label content
-        """
-        return ["NONE",
-                "Pedestrian",
-                "Person on vehicle",
-                "Car",
-                "Bycicle",
-                "Motorbike",
-                "Non motorized vehicle",
-                "Static person",
-                "Distractor",
-                "Occluder",
-                "Occluder on the ground",
-                "Occluder full",
-                "Reflection" ][int(label_id)]
-
     def get_raw(self, folder, parent):
         """ get the raw train data
         """
@@ -184,6 +166,23 @@ class MOT16(MOT_X):
         return ["MOT16-01", "MOT16-03", "MOT16-06", "MOT16-07", \
             "MOT16-08", "MOT16-12", "MOT16-14"]
 
+    def label_id_to_class(self, label_id):
+        """ converts the label number id to
+            the true label content
+        """
+        return ["NONE",
+                "Pedestrian",
+                "Person on vehicle",
+                "Car",
+                "Bycicle",
+                "Motorbike",
+                "Non motorized vehicle",
+                "Static person",
+                "Distractor",
+                "Occluder",
+                "Occluder on the ground",
+                "Occluder full",
+                "Reflection" ][int(label_id)]
 
 # =========================================
 #  MOT15
@@ -198,6 +197,16 @@ class MOT152D(MOT_X):
                 "https://motchallenge.net/data/2DMOT2015.zip", verbose, resize)
         self.root_export = join(root, "2DMOT2015")  # the dirs name after unzip
 
+
+    def get_train_folders(self):
+        return ["ADL-Rundle-6", "ETH-Bahnhof", "ETH-Sunnyday", "KITTI-17", \
+            "TUD-Campus", "Venice-2", "ADL-Rundle-8", "ETH-Pedcross2", \
+            "KITTI-13", "PETS09-S2L1", "TUD-Stadtmitte"]
+
+    def get_test_folders(self):
+        return ["ADL-Rundle-1", "ADL-Rundle-3", "AVG-TownCentre", \
+            "ETH-Jelmoli", "KITTI-16", "PETS09-S2L2", "Venice-1", \
+            "ETH-Crossing", "ETH-Linthescher", "KITTI-19", "TUD-Crossing"]
 
 # =========================================
 #  MARKET 1501
