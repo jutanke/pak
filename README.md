@@ -80,6 +80,8 @@ X, Y = cuhk03.get_labeled()
 # X, Y = cuhk03.get_detected()
 ```
 
+![pak_cuhk03](https://user-images.githubusercontent.com/831215/32894185-592e68e8-cadc-11e7-833b-d479ab5a9cd5.png)
+
 #### Licence 
 This dataset is ONLY released for academic use. Please do not further distribute the dataset (including the download link), or put any of the images on the public website, due to the university regulations and privacy policy in Hong Kong law. Please kindly cite our paper if you use our data in your research. Thanks and hope you will benefit from our dataset. 
 
