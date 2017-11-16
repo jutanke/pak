@@ -66,6 +66,8 @@ X, Y = m1501.get_train_raw()
 ![market1501](https://user-images.githubusercontent.com/831215/32785225-4afc5884-c951-11e7-95b1-542c11e7736e.png)
 
 ### CUHK03
+Dataset[4] with cropped images of persons from different angles and cameras. The dataset uses human annotated as well as
+automatically annotated pictures.
 The authors require users to explicitly download the data from their [website](https://docs.google.com/forms/d/e/1FAIpQLSfueNRWgRp3Hui2HdnqHGbpdLUgSn-W8QxpZF0flcjNnvLZ1w/viewform?formkey=dHRkMkFVSUFvbTJIRkRDLWRwZWpONnc6MA#gid=0) so it is not possible to automatically download it.
 [Sample code](https://github.com/justayak/pak/blob/master/samples/CUHK03.ipynb)
 
@@ -95,3 +97,5 @@ This dataset is ONLY released for academic use. Please do not further distribute
 [2] Leal-Taixé, Laura, et al. "Motchallenge 2015: Towards a benchmark for multi-target tracking." arXiv preprint arXiv:1504.01942 (2015).
 
 [3] Zheng, Liang, et al. "Scalable person re-identification: A benchmark." Proceedings of the IEEE International Conference on Computer Vision. 2015.
+
+[4] Li, Wei, et al. "Deepreid: Deep filter pairing neural network for person re-identification." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2014.
