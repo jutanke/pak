@@ -1,7 +1,8 @@
 # pak
 ![milk](https://user-images.githubusercontent.com/831215/32673460-9057f8ac-c64f-11e7-97e0-672eef1fe75d.png)
 Personal computer vision/deep learning dataset helper toolbox to make it less tedious to download and 
-load common datasets.
+load common datasets. This software is not affiliated with any of the datasets but is instead just a thin helper box to ease 
+interacting with the data. Please respect the respective dataset author's licenses!
 
 ## Datasets
 
@@ -65,6 +66,26 @@ X, Y = m1501.get_train_raw()
 
 ![market1501](https://user-images.githubusercontent.com/831215/32785225-4afc5884-c951-11e7-95b1-542c11e7736e.png)
 
+### CUHK03
+Dataset[4] with cropped images of persons from different angles and cameras. The dataset uses human annotated as well as
+automatically annotated pictures.
+The authors require users to explicitly download the data from their [website](https://docs.google.com/forms/d/e/1FAIpQLSfueNRWgRp3Hui2HdnqHGbpdLUgSn-W8QxpZF0flcjNnvLZ1w/viewform?formkey=dHRkMkFVSUFvbTJIRkRDLWRwZWpONnc6MA#gid=0) so it is not possible to automatically download it.
+[Sample code](https://github.com/justayak/pak/blob/master/samples/CUHK03.ipynb)
+
+```python
+from pak import datasets
+
+# the images do not have the same size and have to be resized
+w, h = 60, 160
+cuhk03 = datasets.cuhk03('/place/where/the/downloaded/zip/is/stored', target_w=w, target_h=h)
+
+X, Y = cuhk03.get_labeled()
+# X, Y = cuhk03.get_detected()
+```
+
+#### Licence 
+This dataset is ONLY released for academic use. Please do not further distribute the dataset (including the download link), or put any of the images on the public website, due to the university regulations and privacy policy in Hong Kong law. Please kindly cite our paper if you use our data in your research. Thanks and hope you will benefit from our dataset. 
+
 
 # References
 
@@ -75,3 +96,5 @@ X, Y = m1501.get_train_raw()
 [2] Leal-Taixé, Laura, et al. "Motchallenge 2015: Towards a benchmark for multi-target tracking." arXiv preprint arXiv:1504.01942 (2015).
 
 [3] Zheng, Liang, et al. "Scalable person re-identification: A benchmark." Proceedings of the IEEE International Conference on Computer Vision. 2015.
+
+[4] Li, Wei, et al. "Deepreid: Deep filter pairing neural network for person re-identification." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2014.
