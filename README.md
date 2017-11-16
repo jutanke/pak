@@ -102,6 +102,23 @@ X, Y = cuhk03.get_labeled()
 This dataset is ONLY released for academic use. Please do not further distribute the dataset (including the download link), or put any of the images on the public website, due to the university regulations and privacy policy in Hong Kong law. Please kindly cite our paper if you use our data in your research. Thanks and hope you will benefit from our dataset. 
 
 
+### Leeds Sports Pose Extended Training Dataset
+[5][Dataset](http://sam.johnson.io/research/lspet.html)
+
+[Sample code](https://github.com/justayak/pak/blob/master/samples/LeedsSportsPoseExtended.ipynb)
+
+```python
+from pak import datasets
+lspe = datasets.LSPE('/place/to/store/the/data')
+# if the library cannot find the data in the given directory it
+# will download it and place it there..
+
+X, Y = lspe.get_raw()
+```
+
+![pak_lspe](https://user-images.githubusercontent.com/831215/32917435-77d235ac-cb1f-11e7-957e-8fcd8301e271.png)
+
+
 # References
 
 [0] Milk-Icon: Icon made by Smashicons from www.flaticon.com
@@ -113,3 +130,5 @@ This dataset is ONLY released for academic use. Please do not further distribute
 [3] Zheng, Liang, et al. "Scalable person re-identification: A benchmark." Proceedings of the IEEE International Conference on Computer Vision. 2015.
 
 [4] Li, Wei, et al. "Deepreid: Deep filter pairing neural network for person re-identification." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2014.
+
+[5] Johnson, Sam, and Mark Everingham. "Learning effective human pose estimation from inaccurate annotation." Computer Vision and Pattern Recognition (CVPR), 2011 IEEE Conference on. IEEE, 2011.
