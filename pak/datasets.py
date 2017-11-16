@@ -24,17 +24,6 @@ class Dataset:
         if not exists(root):
             makedirs(root)
 
-    def get_train(self):
-        """ returns the train dataset X and Y
-        """
-        X, Y = self.get_train_impl()
-        return X, Y
-
-
-    def get_train_impl(self):
-        raise NotImplementedError("Must be overriden")
-
-
     def unzip(self):
         """ Unzip the name file into the root_export directory
             If the zip file is not found an exception is thrown
@@ -90,10 +79,6 @@ class MOT_X(Dataset):
         self.download_and_unzip(url)
         self.resize = resize
 
-    def get_train_impl(self):
-        """ impl
-        """
-        return 1, 2
 
     def get_raw(self, folder, parent):
         """ get the raw train data
@@ -118,13 +103,13 @@ class MOT_X(Dataset):
 
         return X, Y_det
 
-    def get_test_raw(self, folder):
+    def get_test(self, folder):
         """ Gets the raw MOT data for testing
         """
         parent = 'test'
         return MOT_X.get_raw(self, folder, parent=parent)
 
-    def get_train_raw(self, folder):
+    def get_train(self, folder):
         """ Gets the raw MOT data for training
         """
         parent = 'train'
@@ -221,10 +206,10 @@ class Market1501(Dataset):
         self.download_and_unzip('NOT-YET-THERE')
         self.root_export = join(root, "Market-1501-v15.09.15")
 
-    def get_train_raw(self):
+    def get_train(self):
         return self.get_raw('bounding_box_train')
 
-    def get_test_raw(self):
+    def get_test(self):
         return self.get_raw('bounding_box_test')
 
     def get_raw(self, folder):
