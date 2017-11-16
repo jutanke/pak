@@ -10,6 +10,15 @@ Install the library using pip:
 pip install git+https://github.com/justayak/pak.git
 ```
 
+### Requirements 
+
+* python >=3.5
+* numpy
+* scipy
+* skimage
+* h5py
+
+
 ## Datasets
 
 ### MOT16
