@@ -4,6 +4,12 @@ Personal computer vision/deep learning dataset helper toolbox to make it less te
 load common datasets. This software is not affiliated with any of the datasets but is instead just a thin helper box to ease 
 interacting with the data. Please respect the respective dataset author's licenses!
 
+## Install
+Install the library using pip:
+```bash
+pip install git+https://github.com/justayak/pak.git
+```
+
 ## Datasets
 
 ### MOT16
