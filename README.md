@@ -17,8 +17,8 @@ mot16 = datasets.MOT16('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
-X, Y_det, Y_gt  = mot16.get_train_raw("MOT16-02")
-X, Y_det        = mot16.get_test_raw("MOT16-01")
+X, Y_det, Y_gt  = mot16.get_train("MOT16-02")
+X, Y_det        = mot16.get_test("MOT16-01")
 ```
 
 ![mot16](https://user-images.githubusercontent.com/831215/32783815-5336b2b4-c94d-11e7-8e8c-db4209e61450.png)
@@ -39,8 +39,8 @@ mot15 = datasets.MOT152D('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
-X, Y_det, Y_gt  = mot15.get_train_raw("ADL-Rundle-6")
-X, Y_det        = mot15.get_test_raw("ADL-Rundle-1")
+X, Y_det, Y_gt  = mot15.get_train("ADL-Rundle-6")
+X, Y_det        = mot15.get_test("ADL-Rundle-1")
 ```
 
 ![mot15](https://user-images.githubusercontent.com/831215/32783818-5407e69a-c94d-11e7-9569-f6942b2be857.png)
@@ -61,7 +61,7 @@ mot15 = datasets.Market1501('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
-X, Y = m1501.get_train_raw()
+X, Y = m1501.get_train()
 ```
 
 ![market1501](https://user-images.githubusercontent.com/831215/32785225-4afc5884-c951-11e7-95b1-542c11e7736e.png)
