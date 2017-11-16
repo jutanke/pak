@@ -275,7 +275,17 @@ class cuhk03(Dataset):
         self.target_h = target_h
 
 
-    def get_train_raw(self, folder):
+    def get_detected(self):
+        """ gets the images that were detected by a automated person detector
+        """
+        return self.get_raw('detected')
+
+    def get_labeled(self):
+        """ gets the images that were humanly-annotated
+        """
+        return self.get_raw('labeled')
+
+    def get_raw(self, folder):
         f = h5py.File(self.hd5file,'r+')
         data = f[folder]
         _, n = data.shape
