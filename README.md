@@ -65,6 +65,24 @@ X, Y = m1501.get_train_raw()
 
 ![market1501](https://user-images.githubusercontent.com/831215/32785225-4afc5884-c951-11e7-95b1-542c11e7736e.png)
 
+### CUHK03
+The authors require users to explicitly download the data from their [website](https://docs.google.com/forms/d/e/1FAIpQLSfueNRWgRp3Hui2HdnqHGbpdLUgSn-W8QxpZF0flcjNnvLZ1w/viewform?formkey=dHRkMkFVSUFvbTJIRkRDLWRwZWpONnc6MA#gid=0) so it is not possible to automatically download it.
+[Sample code](https://github.com/justayak/pak/blob/master/samples/CUHK03.ipynb)
+
+```python
+from pak import datasets
+
+# the images do not have the same size and have to be resized
+w, h = 60, 160
+cuhk03 = datasets.cuhk03('/place/where/the/downloaded/zip/is/stored', target_w=w, target_h=h)
+
+X, Y = cuhk03.get_labeled()
+# X, Y = cuhk03.get_detected()
+```
+
+#### Licence 
+This dataset is ONLY released for academic use. Please do not further distribute the dataset (including the download link), or put any of the images on the public website, due to the university regulations and privacy policy in Hong Kong law. Please kindly cite our paper if you use our data in your research. Thanks and hope you will benefit from our dataset. 
+
 
 # References
 
