@@ -1,7 +1,8 @@
 # pak
 ![milk](https://user-images.githubusercontent.com/831215/32673460-9057f8ac-c64f-11e7-97e0-672eef1fe75d.png)
 Personal computer vision/deep learning dataset helper toolbox to make it less tedious to download and 
-load common datasets.
+load common datasets. This software is not affiliated with any of the datasets but is instead just a thin helper box to ease 
+interacting with the data. Please respect the respective dataset author's licenses!
 
 ## Datasets
 
