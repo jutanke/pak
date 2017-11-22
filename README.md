@@ -118,6 +118,21 @@ X, Y = lspe.get_raw()
 
 ![pak_lspe](https://user-images.githubusercontent.com/831215/32917435-77d235ac-cb1f-11e7-957e-8fcd8301e271.png)
 
+### DukeMTMC-reID
+[6][Dataset](https://drive.google.com/uc?id=0B0VOCNYh8HeRdnBPa2ZWaVBYSVk&export=download) that is similar to market-1501.
+However, the images are not cropped to have the same size!
+
+[Sample code](https://github.com/justayak/pak/blob/master/samples/DukeMTMC-reID.ipynb)
+
+```python
+from pak import datasets
+duke = datasets.DukeMTMC_reID('/place/to/store/the/data')
+# please download the dataset from the given url and put the zip file into the path
+
+X, Y = duke.get_test()
+```
+
+![duke](https://user-images.githubusercontent.com/831215/33133206-5fd89e88-cf9c-11e7-930c-65ef51ae061a.png)
 
 # References
 
@@ -132,3 +147,5 @@ X, Y = lspe.get_raw()
 [4] Li, Wei, et al. "Deepreid: Deep filter pairing neural network for person re-identification." Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition. 2014.
 
 [5] Johnson, Sam, and Mark Everingham. "Learning effective human pose estimation from inaccurate annotation." Computer Vision and Pattern Recognition (CVPR), 2011 IEEE Conference on. IEEE, 2011.
+
+[6] Ristani, Ergys, et al. "Performance measures and a data set for multi-target, multi-camera tracking." European Conference on Computer Vision. Springer International Publishing, 2016.
