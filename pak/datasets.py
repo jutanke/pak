@@ -12,6 +12,7 @@ from scipy.misc import imresize
 from scipy.io import loadmat
 from skimage.transform import resize
 from pak import utils
+from pak.util import mpii_human_pose as mpii_hp
 import h5py
 
 class Dataset:
@@ -259,6 +260,7 @@ class MPII_human_pose(Dataset):
     """
 
     def __init__(self, root, verbose=True):
+        mpii_hp.test()
         Dataset.__init__(self, 'mpii_human_pose_v1', root, verbose)
 
         url_data = 'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz'
