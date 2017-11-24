@@ -2,6 +2,7 @@
 
 import numpy as np
 import zipfile
+import tarfile
 import urllib.request
 import shutil
 from os import makedirs, listdir
@@ -43,14 +44,21 @@ class Dataset:
         else:
             utils.talk(dest + ' found :)', self.verbose)
 
-    def download_and_unzip(self, url):
+    def download_and_unzip(self, url, zipfile_name=None, dest_folder=None):
         """ Downloads and unzips a zipped data file
 
         """
-        dest = join(self.root, self.name)
+        if dest_folder is None:
+            dest = join(self.root, self.name)
+        else:
+            dest = join(self.root, dest_folder)
+
         if not exists(dest):
             utils.talk("could not find folder " + dest + "...", self.verbose)
-            fzip = join(self.root, self.name + ".zip")
+            if zipfile_name is None:
+                fzip = join(self.root, self.name + ".zip")
+            else:
+                fzip = join(self.root, zipfile_name)
 
             if isfile(fzip):
                 utils.talk('found ' + fzip, self.verbose)
@@ -60,10 +68,17 @@ class Dataset:
                 with urllib.request.urlopen(url) as res, open(fzip, 'wb') as f:
                     utils.talk(url + " downloaded..", self.verbose)
                     shutil.copyfileobj(res, f)
-            zip_ref = zipfile.ZipFile(fzip, 'r')
-            utils.talk("unzip " + fzip + " -> " + self.root, self.verbose)
-            zip_ref.extractall(self.root_export)
-            zip_ref.close()
+
+            if fzip.endswith('.zip'):
+                utils.talk("unzip " + fzip + " -> " + self.root, self.verbose)
+                zip_ref = zipfile.ZipFile(fzip, 'r')
+                zip_ref.extractall(self.root_export)
+                zip_ref.close()
+            elif fzip.endswith('tar.gz'):
+                utils.talk("untar " + fzip + " -> " + self.root, self.verbose)
+                tar = tarfile.open(fzip, 'r:gz')
+                tar.extractall(self.root_export)
+                tar.close()
         else:
             utils.talk(dest + ' found :)', self.verbose)
 
@@ -235,6 +250,26 @@ class Market1501(Dataset):
 
         return X, np.rollaxis(Y, 1)
 
+
+# =========================================
+#  MPII-Human-Pose
+# =========================================
+class MPII_human_pose(Dataset):
+    """ MPII Human Pose dataset
+    """
+
+    def __init__(self, root, verbose=True):
+        Dataset.__init__(self, 'mpii_human_pose_v1', root, verbose)
+
+        url_data = 'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz'
+        url_anno = 'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1_u12_2.zip'
+        self.download_and_unzip(url_anno,
+            zipfile_name='mpii_human_pose_v1_u12_2.zip',
+            dest_folder='mpii_human_pose_v1_u12_2')
+        self.root_export = join(root, 'mpii_human_pose_v1_u12_2')
+        self.download_and_unzip(url_data,
+            zipfile_name='mpii_human_pose_v1.tar.gz',
+            dest_folder=join('mpii_human_pose_v1_u12_2', 'images'))
 
 # =========================================
 #  LSPE
