@@ -15,6 +15,42 @@ class Person:
     head_bb = None
     joints = None
 
+def nbr_to_joint(i):
+    if i == 0:
+        return "r ankle"
+    elif i == 1:
+        return "r knee"
+    elif i == 2:
+        return "r hip"
+    elif i == 3:
+        return "l hip"
+    elif i == 4:
+        return "l knee"
+    elif i == 5:
+        return "l ankle"
+    elif i == 6:
+        return "pelvis"
+    elif i == 7:
+        return "thorax"
+    elif i == 8:
+        return "upper neck"
+    elif i == 9:
+        return "head top"
+    elif i == 10:
+        return "r wrist"
+    elif i == 11:
+        return "r elbow"
+    elif i == 12:
+        return "r shoulder"
+    elif i == 13:
+        return "l shoulder"
+    elif i == 14:
+        return "l elbow"
+    elif i == 15:
+        return "l wrist"
+    else:
+        raise Exception("Invalid joint id:" + str(i))
+
 def test_if_joints_are_first(joints):
     for F, _, _, _ in joints:
         if F > 15:

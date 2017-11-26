@@ -260,7 +260,7 @@ class MPII_human_pose(Dataset):
     """
 
     def __init__(self, root, verbose=True):
-        mpii_hp.test()
+        #mpii_hp.test()
         Dataset.__init__(self, 'mpii_human_pose_v1', root, verbose)
 
         url_data = 'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz'
@@ -272,6 +272,27 @@ class MPII_human_pose(Dataset):
         self.download_and_unzip(url_data,
             zipfile_name='mpii_human_pose_v1.tar.gz',
             dest_folder=join('mpii_human_pose_v1_u12_2', 'images'))
+
+
+    def get_annotation(self):
+        """ reads the annotation and returns it
+        """
+        mat = join(self.root_export, "mpii_human_pose_v1_u12_1.mat")
+        M = loadmat(mat)
+        M = M['RELEASE']
+        AL = M['annolist'][0][0][0]
+        n = len(AL)
+        n = 10
+        result = []
+        for i in range(n):
+            print("stuff", i)
+            e = AL[i]   # get the image meta data, nbr of persons,
+                        # person joints, etc.
+            print(e)
+            data = mpii_hp.get_data(e)
+            result.append(data)
+        return result
+
 
 # =========================================
 #  LSPE
