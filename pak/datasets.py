@@ -281,6 +281,9 @@ class MPII_human_pose(Dataset):
         M = loadmat(mat)
         M = M['RELEASE']
         AL = M['annolist'][0][0][0]
+        TR = M['img_train'][0][0][0]
+
+
         n = len(AL)
         n = 10
         result = []
@@ -289,7 +292,8 @@ class MPII_human_pose(Dataset):
             e = AL[i]   # get the image meta data, nbr of persons,
                         # person joints, etc.
             print(e)
-            data = mpii_hp.get_data(e)
+            is_training_data = TR[i] == 1
+            data = mpii_hp.get_data(e, is_training_data)
             result.append(data)
         return result
 

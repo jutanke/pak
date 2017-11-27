@@ -77,7 +77,7 @@ def compress_joints(joints):
             obj.append((joint_type, x, y, visible))
         return obj
 
-def get_data(image_meta):
+def get_data(image_meta, is_training_data):
     """ the meta data has a horrible shape..
         I guess that's because of the extraction
         from matlab code..
@@ -87,20 +87,21 @@ def get_data(image_meta):
 
     result.name= image_meta[0][0][0][0][0]
     _, nbr_persons = image_meta[1].shape
-    result.vidx = image_meta[2][0][0]
-    result.frame_sec = image_meta[3][0][0]
+    result.vidx = image_meta[2][0][0] if is_training_data else -1
+    result.frame_sec = image_meta[3][0][0] if is_training_data else -1
 
     for person in range(nbr_persons):
         p = Person()
-        x1 = image_meta[1][0][person][0][0][0]
-        y1 = image_meta[1][0][person][1][0][0]
-        x2 = image_meta[1][0][person][2][0][0]
-        y2 = image_meta[1][0][person][3][0][0]
+        if is_training_data:
+            x1 = image_meta[1][0][person][0][0][0]
+            y1 = image_meta[1][0][person][1][0][0]
+            x2 = image_meta[1][0][person][2][0][0]
+            y2 = image_meta[1][0][person][3][0][0]
 
-        p.head_bb = ((x1, y1), (x2, y2))
+            p.head_bb = ((x1, y1), (x2, y2))
 
-        joints = image_meta[1][0][person][4][0][0][0][0]
-        p.joints = compress_joints(joints)
-        result.people.append(p)
+            joints = image_meta[1][0][person][4][0][0][0][0]
+            p.joints = compress_joints(joints)
+            result.people.append(p)
 
     return result
