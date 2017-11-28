@@ -382,17 +382,22 @@ class Hand(Dataset):
             zipfile_name='hand_dataset.tar.gz')
         self.root_export = join(root, "hand_dataset")
 
-    def get_test(self):
-        return self.get_raw(join('test_dataset', 'test_data'))
+    def get_test(self, make_square=False):
+        return self.get_raw(join('test_dataset', 'test_data'), make_square)
 
-    def get_train(self):
-        return self.get_raw(join('training_dataset', 'training_data'))
+    def get_train(self, make_square=False):
+        return self.get_raw(join('training_dataset', 'training_data'),\
+            make_square)
 
-    def get_val(self):
-        return self.get_raw(join('validation_dataset', 'validation_data'))
+    def get_val(self, make_square=False):
+        return self.get_raw(join('validation_dataset', 'validation_data'),\
+            make_square)
 
-    def get_raw(self, subfolder):
+    def get_raw(self, subfolder, make_square):
         """ test vs train vs validation
+
+            make_square: if True a 4th point is added to enclose the
+                hand
         """
         path = join(self.root_export, subfolder)
 
@@ -423,7 +428,23 @@ class Hand(Dataset):
                 Hand = []
                 for j in range(3):
                     e = single_hand[j][0]
-                    Hand.append(e)
+                    Hand.append(np.array((e[1], e[0])))  # first X, then Y ...
+                if make_square:
+                    v1 = Hand[0]
+                    v2 = Hand[1]
+                    v3 = Hand[2]
+
+                    # we want to determine {4} given (1),(2),(3)
+                    # (1)--(w)--(2)
+                    #  .         |
+                    #  .        (h)
+                    #  .         |
+                    # {4}. . . .(3)
+                    direction = v3 - v2
+                    v4 = v1 + direction
+                    Hand.append(v4)
+
+
                 Frame.append(Hand)
             Y.append(Frame)
 
