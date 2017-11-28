@@ -182,6 +182,22 @@ As long as you:
 
     Attribute: You must attribute any public use of the database, or works produced from the database, in the manner specified in the license. For any use or redistribution of the database, or works produced from it, you must make clear to others the license of the database and keep intact any notices on the original database.
 
+### Hand Dataset
+[7][Collection](http://www.robots.ox.ac.uk/~vgg/data/hands/) of hand images from various public images. 
+[Sample code](https://github.com/justayak/pak/blob/master/samples/hand_dataset.ipynb)
+
+```python
+from pak import datasets
+hand = datasets.Hand('/place/to/store/the/data')
+# if the library cannot find the data in the given directory it
+# will download it and place it there..
+
+X_test, Y_test = hand.get_test()
+X_train, Y_train = hand.get_train()
+X_val, Y_val = hand.get_val()
+```
+
+![hand_dataset](https://user-images.githubusercontent.com/831215/33312758-13f0f7f4-d429-11e7-9561-3cebf8832548.png)
 
 # References
 
@@ -198,3 +214,5 @@ As long as you:
 [5] Johnson, Sam, and Mark Everingham. "Learning effective human pose estimation from inaccurate annotation." Computer Vision and Pattern Recognition (CVPR), 2011 IEEE Conference on. IEEE, 2011.
 
 [6] Ristani, Ergys, et al. "Performance measures and a data set for multi-target, multi-camera tracking." European Conference on Computer Vision. Springer International Publishing, 2016.
+
+[7] Mittal, Arpit, Andrew Zisserman, and Philip HS Torr. "Hand detection using multiple proposals." BMVC. 2011.
