@@ -14,6 +14,7 @@ from skimage.transform import resize
 from pak import utils
 from pak.util import mpii_human_pose as mpii_hp
 import h5py
+from enum import Enum
 
 class Dataset:
     """ Dataset base class
@@ -366,6 +367,10 @@ class DukeMTMC_reID(Dataset):
 # =========================================
 #  Hand
 # =========================================
+class Hand_config(Enum):
+    Default = 1
+    Square = 2
+    AABB = 3
 
 class Hand(Dataset):
     """
@@ -382,23 +387,26 @@ class Hand(Dataset):
             zipfile_name='hand_dataset.tar.gz')
         self.root_export = join(root, "hand_dataset")
 
-    def get_test(self, make_square=False):
-        return self.get_raw(join('test_dataset', 'test_data'), make_square)
+    def get_test(self, config=Hand_config.Default):
+        return self.get_raw(join('test_dataset', 'test_data'), config)
 
-    def get_train(self, make_square=False):
+    def get_train(self, config=Hand_config.Default):
         return self.get_raw(join('training_dataset', 'training_data'),\
-            make_square)
+            config)
 
-    def get_val(self, make_square=False):
+    def get_val(self, config=Hand_config.Default):
         return self.get_raw(join('validation_dataset', 'validation_data'),\
-            make_square)
+            config)
 
-    def get_raw(self, subfolder, make_square):
+    def get_raw(self, subfolder, config):
         """ test vs train vs validation
 
             make_square: if True a 4th point is added to enclose the
                 hand
         """
+        make_square = config is Hand_config.Square or config is Hand_config.AABB
+        aabb = config is Hand_config.AABB
+
         path = join(self.root_export, subfolder)
 
         # # annotations
@@ -443,6 +451,17 @@ class Hand(Dataset):
                     direction = v3 - v2
                     v4 = v1 + direction
                     Hand.append(v4)
+
+                    if aabb:
+                        x1,y1 = v1
+                        x2,y2 = v2
+                        x3,y3 = v3
+                        x4,y4 = v4
+
+                        Hand = [
+                            np.array([max([x1,x2,x3,x4]), max([y1,y2,y3,y4])]),
+                            np.array([min([x1,x2,x3,x4]), min([y1,y2,y3,y4])])
+                        ]
 
 
                 Frame.append(Hand)
