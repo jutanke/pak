@@ -199,6 +199,26 @@ X_val, Y_val = hand.get_val()
 
 ![hand_dataset](https://user-images.githubusercontent.com/831215/33312758-13f0f7f4-d429-11e7-9561-3cebf8832548.png)
 
+
+### EgoHands Dataset
+[8][Dataset](http://vision.soic.indiana.edu/projects/egohands/) containing 48 Google Glass videos of interactions
+between two people.
+[Sample code](https://github.com/justayak/pak/blob/master/samples/EgoHands.ipynb)
+
+```python
+from pak import datasets
+egohand = datasets.EgoHands(root)
+# if the library cannot find the data in the given directory it
+# will download it and place it there..
+
+# the image data occupies ~15GB of RAM so if your computer
+# cannot handle such big data you should set memmapped=True
+X, Y = egohand.get_raw(memmapped=True)
+```
+
+![egohands](https://user-images.githubusercontent.com/831215/33382371-da8a84a0-d520-11e7-8e87-95c5aba8e814.png)
+
+
 # References
 
 [0] Milk-Icon: Icon made by Smashicons from www.flaticon.com
@@ -216,3 +236,5 @@ X_val, Y_val = hand.get_val()
 [6] Ristani, Ergys, et al. "Performance measures and a data set for multi-target, multi-camera tracking." European Conference on Computer Vision. Springer International Publishing, 2016.
 
 [7] Mittal, Arpit, Andrew Zisserman, and Philip HS Torr. "Hand detection using multiple proposals." BMVC. 2011.
+
+[8] Bambach, Sven, et al. "Lending a hand: Detecting hands and recognizing activities in complex egocentric interactions." Proceedings of the IEEE International Conference on Computer Vision. 2015.
