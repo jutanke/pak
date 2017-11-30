@@ -32,8 +32,10 @@ mot16 = datasets.MOT16('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
-X, Y_det, Y_gt  = mot16.get_train("MOT16-02")
-X, Y_det        = mot16.get_test("MOT16-01")
+# Some videos might be too large to fit into your memory so you
+# can load them into a memory-mapped file for easier handling
+X, Y_det, Y_gt  = mot16.get_train("MOT16-02", memmapped=True)
+X, Y_det        = mot16.get_test("MOT16-01", memmapped=True)
 ```
 
 ![mot16](https://user-images.githubusercontent.com/831215/32783815-5336b2b4-c94d-11e7-8e8c-db4209e61450.png)
