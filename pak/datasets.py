@@ -98,7 +98,7 @@ class MOT_X(Dataset):
         self.resize = resize
 
 
-    def get_raw(self, folder, parent):
+    def get_raw(self, folder, parent, memmapped=False):
         """ get the raw train data
         """
         root = join(self.root_export, parent)
@@ -108,10 +108,36 @@ class MOT_X(Dataset):
         img_loc = join(loc, "img1")
         imgs = sorted([join(img_loc, f) \
                 for f in listdir(img_loc) if isfile(join(img_loc, f))])
-        if self.resize is None:
-            X = np.array([imread(f) for f in imgs], 'uint8')
+        if memmapped:
+            if self.resize is not None:
+                raise Exception('Cannot resize and use memmap')
+
+            # we NEED the data shape!
+            num_frames = len(imgs)
+            w,h,c = imread(imgs[0]).shape
+            data_shape = (num_frames, w, h, c)
+
+            fmmap = join(loc, 'data.memmap')
+
+            if not isfile(fmmap):
+                # data has to be created
+                utils.talk(self.name + ": create memmapped file " + fmmap, self.verbose)
+                X = np.memmap(fmmap, dtype='uint8', mode="w+", shape=data_shape)
+                for i,f in enumerate(imgs):
+                    X[i] = imread(f)
+
+                X.flush()
+                del X
+
+            utils.talk(self.name + ": load memmapped file " + fmmap, self.verbose)
+            X = np.memmap(fmmap, dtype='uint8', mode='r', shape=data_shape)
+
         else:
-            X = np.array([imresize(imread(f), size=self.resize) for f in imgs], 'uint8')
+            # Not memmapped files -> load everything into memory
+            if self.resize is None:
+                X = np.array([imread(f) for f in imgs], 'uint8')
+            else:
+                X = np.array([imresize(imread(f), size=self.resize) for f in imgs], 'uint8')
         utils.talk(self.name + ' X loaded', self.verbose)
 
         # Y-det
@@ -121,17 +147,17 @@ class MOT_X(Dataset):
 
         return X, Y_det
 
-    def get_test(self, folder):
+    def get_test(self, folder, memmapped=False):
         """ Gets the raw MOT data for testing
         """
         parent = 'test'
-        return MOT_X.get_raw(self, folder, parent=parent)
+        return MOT_X.get_raw(self, folder, parent=parent, memmapped=memmapped)
 
-    def get_train(self, folder):
+    def get_train(self, folder, memmapped=False):
         """ Gets the raw MOT data for training
         """
         parent = 'train'
-        X, Y_det = MOT_X.get_raw(self, folder, parent=parent)
+        X, Y_det = MOT_X.get_raw(self, folder, parent=parent, memmapped=memmapped)
 
         # Y-gt
         root = join(self.root_export, parent)
@@ -454,7 +480,7 @@ class EgoHands(Dataset):
                 #del X  # flush the file
                 utils.talk('flush memmap to file', self.verbose)
                 X.flush() # write memmap to files
-                X.close()
+                del X
 
             X = np.memmap(fmmap, dtype='uint8', mode='r', shape=X_shape)
         else:
