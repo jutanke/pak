@@ -27,8 +27,8 @@ Tracking + evaluation is done in image coordinates.
 [Sample code](https://github.com/justayak/pak/blob/master/samples/MOT16.ipynb)
 
 ```python
-from pak import datasets
-mot16 = datasets.MOT16('/place/to/store/the/data')
+from pak.datasets.MOT import MOT16
+mot16 = MOT16('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
@@ -51,8 +51,8 @@ This means that you must attribute the work in the manner specified by the autho
 [Sample code](https://github.com/justayak/pak/blob/master/samples/MOT15_2D.ipynb)
 
 ```python
-from pak import datasets
-mot15 = datasets.MOT152D('/place/to/store/the/data')
+from pak.datasets.MOT import MOT152D
+mot15 = MOT152D('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
@@ -73,8 +73,9 @@ contains 1501 different identities that are captured by at least two cameras.
 [Sample code](https://github.com/justayak/pak/blob/master/samples/Market1501.ipynb)
 
 ```python
-from pak import datasets
-mot15 = datasets.Market1501('/place/to/store/the/data')
+from pak.datasets.Market1501 import Market1501 
+
+mot15 = Market1501('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
@@ -90,11 +91,11 @@ The authors require users to explicitly download the data from their [website](h
 [Sample code](https://github.com/justayak/pak/blob/master/samples/CUHK03.ipynb)
 
 ```python
-from pak import datasets
+from pak.datasets.CUHK03 import cuhk03
 
 # the images do not have the same size and have to be resized
 w, h = 60, 160
-cuhk03 = datasets.cuhk03('/place/where/the/downloaded/zip/is/stored', target_w=w, target_h=h)
+cuhk03 = cuhk03('/place/where/the/downloaded/zip/is/stored', target_w=w, target_h=h)
 
 X, Y = cuhk03.get_labeled()
 # X, Y = cuhk03.get_detected()
@@ -110,8 +111,9 @@ This dataset is ONLY released for academic use. Please do not further distribute
 [Sample code](https://github.com/justayak/pak/blob/master/samples/LeedsSportsPoseExtended.ipynb)
 
 ```python
-from pak import datasets
-lspe = datasets.LSPE('/place/to/store/the/data')
+from pak.datasets.LSPE import LSPE
+
+lspe = LSPE('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
@@ -127,8 +129,9 @@ However, the images are not cropped to have the same size!
 [Sample code](https://github.com/justayak/pak/blob/master/samples/DukeMTMC-reID.ipynb)
 
 ```python
-from pak import datasets
-duke = datasets.DukeMTMC_reID('/place/to/store/the/data')
+from pak.datasets.DukeMTMC import DukeMTMC_reID
+
+duke = DukeMTMC_reID('/place/to/store/the/data')
 # please download the dataset from the given url and put the zip file into the path
 
 X, Y = duke.get_test()
@@ -189,8 +192,8 @@ As long as you:
 [Sample code](https://github.com/justayak/pak/blob/master/samples/hand_dataset.ipynb)
 
 ```python
-from pak import datasets
-hand = datasets.Hand('/place/to/store/the/data')
+from pak.datasets.Hands import Hand
+hand = Hand('/place/to/store/the/data')
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
@@ -208,8 +211,9 @@ between two people.
 [Sample code](https://github.com/justayak/pak/blob/master/samples/EgoHands.ipynb)
 
 ```python
-from pak import datasets
-egohand = datasets.EgoHands(root)
+from pak.datasets.EgoHands import EgoHands
+
+egohand = EgoHands(root)
 # if the library cannot find the data in the given directory it
 # will download it and place it there..
 
