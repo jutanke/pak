@@ -96,6 +96,22 @@ class MOT_X(Dataset):
         return X, Y_det, Y_gt
 
 
+    def get_test_imgfolder(self, folder):
+        return self.get_raw_folder(folder, 'test')
+
+
+    def get_test_imgfolder(self, folder):
+        return self.get_raw_folder(folder, 'train')
+
+
+    def get_raw_folder(self, folder, parent):
+        root = join(self.root_export, parent)
+        loc = join(root, folder)
+        img_loc = join(loc, "img1")
+        assert exists(img_loc)
+        return img_loc
+
+
     def get_train_folders(self):
         raise NotImplementedError("Must be overriden")
 
