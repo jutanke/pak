@@ -45,7 +45,32 @@ class Dataset:
         else:
             utils.talk(dest + ' found :)', self.verbose)
 
-    def download_and_unzip(self, url, zipfile_name=None, dest_folder=None):
+    def download_file(self, url, file_name, dest_folder=None):
+        """ Only download the file
+        """
+        if dest_folder is None:
+            dest = join(self.root_export, self.name)
+        else:
+            dest = join(self.root_export, dest_folder)
+
+        if not exists(dest):
+            makedirs(dest)
+
+        fname = join(dest, file_name)
+        if not isfile(fname):
+            utils.talk("Could not find " + fname + " ..., downloading", self.verbose)
+            with urllib.request.urlopen(url) as res, open(fname, 'wb') as f:
+                utils.talk(url + " downloaded..", self.verbose)
+                shutil.copyfileobj(res, f)
+
+        else:  # file exists
+            utils.talk("File " + fname + " found :)", self.verbose)
+
+
+
+
+    def download_and_unzip(self, url, zipfile_name=None, dest_folder=None,
+        dest_force=True, root_folder=None):
         """ Downloads and unzips a zipped data file
 
         """
@@ -54,12 +79,24 @@ class Dataset:
         else:
             dest = join(self.root, dest_folder)
 
+        if dest_force:
+            export_folder = dest
+        else:
+            self.root_export
+
+        if root_folder is None:
+            root = self.root
+        else:
+            root = join(self.root, root_folder)
+            if not exists(root):
+                makedirs(root)
+
         if not exists(dest):
             utils.talk("could not find folder " + dest + "...", self.verbose)
             if zipfile_name is None:
-                fzip = join(self.root, self.name + ".zip")
+                fzip = join(root, self.name + ".zip")
             else:
-                fzip = join(self.root, zipfile_name)
+                fzip = join(root, zipfile_name)
 
             if isfile(fzip):
                 utils.talk('found ' + fzip, self.verbose)
@@ -71,14 +108,14 @@ class Dataset:
                     shutil.copyfileobj(res, f)
 
             if fzip.endswith('.zip'):
-                utils.talk("unzip " + fzip + " -> " + self.root, self.verbose)
+                utils.talk("unzip " + fzip + " -> " + root, self.verbose)
                 zip_ref = zipfile.ZipFile(fzip, 'r')
-                zip_ref.extractall(self.root_export)
+                zip_ref.extractall(export_folder)
                 zip_ref.close()
             elif fzip.endswith('tar.gz'):
-                utils.talk("untar " + fzip + " -> " + self.root, self.verbose)
+                utils.talk("untar " + fzip + " -> " + root, self.verbose)
                 tar = tarfile.open(fzip, 'r:gz')
-                tar.extractall(self.root_export)
+                tar.extractall(export_folder)
                 tar.close()
         else:
             utils.talk(dest + ' found :)', self.verbose)
