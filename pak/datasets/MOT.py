@@ -111,10 +111,8 @@ class MOT_X(Dataset):
         assert exists(img_loc)
         return img_loc
 
-
     def get_train_folders(self):
         raise NotImplementedError("Must be overriden")
-
 
 # =========================================
 #  MOT16
@@ -155,6 +153,21 @@ class MOT16(MOT_X):
                 "Occluder on the ground",
                 "Occluder full",
                 "Reflection" ][int(label_id)]
+
+    @staticmethod
+    def simplify_gt(Y_gt):
+        """
+        simplifies the GT data to only contain
+            [frame, pid, x, y, w, h]
+        from sensible detections only (Pedestrian + Static person)
+        """
+        Y_ped = utils.extract_eq(Y_gt, col=7, value=1)  # Pedestrian
+        Y_sta = utils.extract_eq(Y_gt, col=7, value=7)  # Static person
+        Y = np.vstack([Y_ped, Y_sta])
+        Y = utils.extract_eq(Y, col=6, value=1)  # is visible
+        Y = utils.extract_eq(Y, col=8, value=1)  # is visible
+
+        return Y[:,0:6]
 
 # =========================================
 #  MOT15
