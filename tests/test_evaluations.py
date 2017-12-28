@@ -12,10 +12,12 @@ class TestEvaluation(unittest.TestCase):
     def test_motm(self):
         Gt = np.array([
             [1, 1, 0, 0],
+            [1, 2, 10, 10],
             [2, 1, 0, 0]
         ])
 
         Hy = np.array([
+            [1, 2, 10, 10],
             [1, 1, 0, 0],
             [2, 1, 0, 0]
         ])
@@ -34,35 +36,35 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(np.sum(fp), 0)
         self.assertEqual(np.sum(m), 0)
         self.assertEqual(np.sum(mme), 0)
-        self.assertEqual(np.sum(g), 2)
-        self.assertEqual(np.sum(c), 2)
+        self.assertEqual(np.sum(g), 3)
+        self.assertEqual(np.sum(c), 3)
 
 
-    def test_simple_motp(self):
-        """ simple MOTP
-        """
-
-        # (frame, pid, x, y, w, h)
-        Gt = np.array([
-            [1, 1, 10, 10, 10, 10],
-            [2, 1, 10, 10, 10, 10],
-            [3, 1, 10, 10, 10, 10],
-            [4, 1, 10, 10, 10, 10],
-            [5, 1, 10, 10, 10, 10]
-        ])
-
-        Hy = np.array([
-            [1, 5, 10, 10, 10, 10],
-            [2, 5, 10, 10, 10, 10],
-            [3, 5, 10, 10, 10, 10],
-            [4, 5, 10, 10, 10, 10],
-            [5, 5, 10, 10, 10, 10]
-        ])
-
-
-        MOTP.evaluate(Gt, Hy, 2)
-
-        self.assertTrue(True)
+    # def test_simple_motp(self):
+    #     """ simple MOTP
+    #     """
+    #
+    #     # (frame, pid, x, y, w, h)
+    #     Gt = np.array([
+    #         [1, 1, 10, 10, 10, 10],
+    #         [2, 1, 10, 10, 10, 10],
+    #         [3, 1, 10, 10, 10, 10],
+    #         [4, 1, 10, 10, 10, 10],
+    #         [5, 1, 10, 10, 10, 10]
+    #     ])
+    #
+    #     Hy = np.array([
+    #         [1, 5, 10, 10, 10, 10],
+    #         [2, 5, 10, 10, 10, 10],
+    #         [3, 5, 10, 10, 10, 10],
+    #         [4, 5, 10, 10, 10, 10],
+    #         [5, 5, 10, 10, 10, 10]
+    #     ])
+    #
+    #
+    #     MOTP.evaluate(Gt, Hy, 2)
+    #
+    #     self.assertTrue(True)
 
 
 # -------------------------------

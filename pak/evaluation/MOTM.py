@@ -32,12 +32,13 @@ def evaluate(Gt, Hy, T, calc_cost):
             m: List<Integer> of misses
             mme: List<Integer> of mismatches
             c: List<Integer> of matches
-            d: List<Object> of distances beween o_i and h_j
+            d: List<Double> of distances beween o_i and h_i (summed)
             g: List<Integer> number of objects in t
 
             all lists have the same length of total number of
             frames
     """
+    global HIGH_VALUE
     first_frame = np.min(Gt[:,0])
     last_frame = np.max(Gt[:,0])
     number_of_frames = last_frame - first_frame + 1
@@ -46,25 +47,10 @@ def evaluate(Gt, Hy, T, calc_cost):
     m = [0] * number_of_frames
     mme = [0] * number_of_frames
     c = [0] * number_of_frames
-    d = [None] * number_of_frames
+    d = [0] * number_of_frames
     g = [0] * number_of_frames
 
     M = MatchLookup(first_frame, last_frame)
-
-    # ----------------------------
-    def get_best_h(Ht, hid, o):
-        """ tries to find the best hypothesis
-            for the given observation
-        """
-        h_candidates = extract_eq(Ht, col=1, value=oid)
-        if len(h_candidates) == 0:
-            return []
-        elif len(h_candidates) == 1:
-            return np.squeeze(h_candidates)[1:]
-        else:
-            best_cost = 9999999999
-            for h in h_candidates:
-                pass
 
     # ----------------------------
     # "t" is the true frame number that can be any integer
@@ -77,20 +63,62 @@ def evaluate(Gt, Hy, T, calc_cost):
         # ----------------------------------
         # verify if old match is still valid!
         # ----------------------------------
+        is_empty = True
         for (o, h) in M.get_matches(t-1):
             oid, hid = o[0], h[0]
-            #o_cur = extract_eq(Ot, col=1, value=oid)
-            assert len(o_cur) < 2
-            if len(o_cur) == 1:
-                # o also exists in the current frame..
-                # ... keep going
-                o_cur = np.squeeze(o_cur)[1:]
+            if Ot.has(oid) and Ht.has(hid):
+                o_cur = Ot.find(oid)
+                h_cur = Ht.find_best(hid, o_cur, calc_cost)
+                cost = calc_cost(o_cur[1:], h_cur[1:])
+                if cost < T:
+                    # the tracked object is still valid! :)
+                    Ot.remove(o_cur)
+                    Ht.remove(h_cur)
+                    M.insert_match(t, o_cur, h_cur)
+                    is_empty = False
 
+        if is_empty:
+            M.init(t)  # to allow frames with no matches!
 
+        # ----------------------------------
+        # match not-yet corresponding pairs
+        # ----------------------------------
+        Ot_ummatched = Ot.as_list()  # the already matched elements
+        Ht_unmatched = Ht.as_list()  # were removed
+        count_o, count_h = len(Ot_ummatched), len(Ht_unmatched)
+        C = np.ones((count_o, count_h)) * HIGH_VALUE
+        for i,o in enumerate(Ot_ummatched):
+            for j,h in enumerate(Ht_unmatched):
+                cost = calc_cost(o[1:], h[1:])
+                C[i,j] = cost if cost < T else HIGH_VALUE
 
-        print(Ot[0][1:])
+        row_ind, col_ind = linear_sum_assignment(C)
 
+        for i, j in zip(row_ind, col_ind):
+            o_cur, h_cur, cost = Ot_ummatched[i], Ht_unmatched[j], C[i,j]
+            if cost < T:
+                Ot.remove(o_cur)
+                Ht.remove(h_cur)
+                M.insert_match(t, o_cur, h_cur)
+                if M.has_mismatch(t, o_cur, h_cur):
+                    mme[t_pos] += 1
 
+        # ----------------------------------
+        # handle unmatched rest
+        # ----------------------------------
+        c[t_pos] = M.count_matches(t)
+        fp[t_pos] = Ht.elements_left
+        assert fp[t_pos] >= 0
+        m[t_pos] = Ot.elements_left
+        assert m[t_pos] >= 0
+
+        # ----------------------------------
+        # calculate cost between all matches
+        # ----------------------------------
+        cost_sum = 0
+        for (o, h) in M.get_matches(t):
+            cost_sum += calc_cost(o[1:], h[1:])
+        d[t_pos] = cost_sum
 
     # ----------------------------
     return fp, m, mme, c, d, g
@@ -124,10 +152,9 @@ class SingleFrameData:
                 self.lookup[pid] = [dobj]
 
 
-    def has(self, o):
+    def has(self, pid):
         """ Tests if the dataframe has the given pid or not
         """
-        pid = o[0]
         return pid in self.lookup
 
 
@@ -208,11 +235,24 @@ class MatchLookup:
     """
 
     def __init__(self, first_frame, last_frame):
-        self.first_frame = first_frame
-        self.last_frame = last_frame
+        self.first_frame = int(first_frame)
+        self.last_frame = int(last_frame)
         number_of_frames = last_frame - first_frame + 1
         self.matches = [None] * number_of_frames
         self.lookups = [None] * number_of_frames
+        self.count_matches_in_t = [0] * number_of_frames
+
+
+    def init(self, t):
+        """ initializes the set in the case of no matches
+
+            The function that accessing un-initialized lookups
+            is considered an error is INTENTIONAL to hopefully
+            prevent hard-to-debug logic-bugs
+        """
+        pos = t - self.first_frame
+        assert self.matches[pos] is None
+        self.matches[pos] = []
 
 
     def insert_match(self, t, o, h):
@@ -235,6 +275,14 @@ class MatchLookup:
         assert o[0] not in self.lookups[pos]
         self.matches[pos].append((o, h))
         self.lookups[pos][o[0]] = h[0]
+        self.count_matches_in_t[pos] += 1
+
+
+    def count_matches(self, t):
+        """ counts the number of matches in frame t
+        """
+        pos = t - self.first_frame
+        return self.count_matches_in_t[pos]
 
 
     def has_mismatch(self, t, o, h):
@@ -242,14 +290,16 @@ class MatchLookup:
             "o" and "h" are samples from the t time step
         """
         if t == self.first_frame:
-            return False  # first frame can never have mismatch
+            return False  # first frame can never mismatch
         assert t <= self.last_frame
         assert t > self.first_frame
         t_prev = t-1
         pos = t_prev - self.first_frame
 
-        if o[0] in self.lookups[pos]:
-            return self.lookups[pos][o[0]] != h[0]
+        oid = o[0]
+        hid = h[0]
+        if oid in self.lookups[pos]:
+            return self.lookups[pos][oid] != hid
 
 
     def get_matches(self, t):
@@ -260,7 +310,8 @@ class MatchLookup:
         assert t <= self.last_frame
         assert t >= self.first_frame
         pos = t - self.first_frame
-        assert self.matches[pos] is not None
-        return self.matches[pos]
+        result = self.matches[pos]
+        assert result is not None
+        return result
 
 # ----
