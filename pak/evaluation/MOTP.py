@@ -12,11 +12,11 @@ def evaluate(gt, hypothesis, threshold):
         Multiple Object Tracking Precision
 
         gt: [
-            (frame, pid, x, y, w, h)
+            (frame, pid, x, y)
         ]
 
         hypothesis: [
-            (frame, pid, x, y, w, h)
+            (frame, pid, x, y)
         ]
 
         threshold: after which no correspondence is possible
