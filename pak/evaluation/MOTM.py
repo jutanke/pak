@@ -47,7 +47,22 @@ def evaluate(Gt, Hy, T, calc_cost):
     d = [None] * number_of_frames
     g = [0] * number_of_frames
 
-    M = [{}]
+    M = MatchLookup(first_frame, last_frame)
+
+    # ----------------------------
+    def get_best_h(Ht, hid, o):
+        """ tries to find the best hypothesis
+            for the given observation
+        """
+        h_candidates = extract_eq(Ht, col=1, value=oid)
+        if len(h_candidates) == 0:
+            return []
+        elif len(h_candidates) == 1:
+            return np.squeeze(h_candidates)[1:]
+        else:
+            best_cost = 9999999999
+            for h in h_candidates:
+                pass
 
     # ----------------------------
     # "t" is the true frame number that can be any integer
@@ -57,6 +72,21 @@ def evaluate(Gt, Hy, T, calc_cost):
         Ht = extract_eq(Hy, col=0, value=t)
         g[t_pos], _ = Ot.shape  # count number of objects in t
 
+        # ----------------------------------
+        # verify if old match is still valid!
+        # ----------------------------------
+        for (o, h) in M.get_matches(t-1):
+            oid, hid = o[0], h[0]
+            o_cur = extract_eq(Ot, col=1, value=oid)
+            assert len(o_cur) < 2
+            if len(o_cur) == 1:
+                # o also exists in the current frame..
+                # ... keep going
+                o_cur = np.squeeze(o_cur)[1:]
+
+
+
+        print(Ot[0][1:])
 
 
 
@@ -85,17 +115,18 @@ class MatchLookup:
         """
         assert t <= self.last_frame
         assert t >= self.first_frame
-        if self.matches[t] is None:
-            self.matches[t] = []
+        pos = t - self.first_frame
+        if self.matches[pos] is None:
+            self.matches[pos] = []
 
-        if self.lookups[t] is None:
+        if self.lookups[pos] is None:
             # this is needed so that we can make
             # sure if we had a mismatch or not!
-            self.lookups[t] = {}
+            self.lookups[pos] = {}
 
-        assert o[0] not in self.lookups[t]
-        self.matches[t].append((o, h))
-        self.lookups[t][o[0]] = h[0]
+        assert o[0] not in self.lookups[pos]
+        self.matches[pos].append((o, h))
+        self.lookups[pos][o[0]] = h[0]
 
 
     def has_mismatch(self, t, o, h):
@@ -107,9 +138,10 @@ class MatchLookup:
         assert t <= self.last_frame
         assert t > self.first_frame
         t_prev = t-1
+        pos = t_prev - self.first_frame
 
-        if o[0] in self.lookups[t_prev]:
-            return self.lookups[t_prev][0] != h[0]
+        if o[0] in self.lookups[pos]:
+            return self.lookups[pos][o[0]] != h[0]
 
 
     def get_matches(self, t):
@@ -119,7 +151,8 @@ class MatchLookup:
             return []
         assert t <= self.last_frame
         assert t >= self.first_frame
-        assert self.matches[t] is not None
-        return self.matches[t]
+        pos = t - self.first_frame
+        assert self.matches[pos] is not None
+        return self.matches[pos]
 
 # ----
