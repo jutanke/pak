@@ -22,6 +22,52 @@ class TestSingleFrameData(unittest.TestCase):
         self.assertEqual(data.total_elements, 4)
         self.assertEqual(data.elements_left, 4)
 
+
+    def test_complex_find(self):
+        cost_fun = lambda a, b: abs(a-b)
+        Data = np.array([
+            [1, 1, 10],
+            [1, 2, 12],
+            [1, 2, 100],
+            [1, 2, -19],
+        ])
+
+        data = MOTM.SingleFrameData(Data)
+        self.assertEqual(data.total_elements, 4)
+        self.assertEqual(data.elements_left, 4)
+
+        obj = data.find_best(2, [1,10], cost_fun)
+        self.assertEqual(obj[0], 2)
+        self.assertEqual(obj[1], 12)
+
+
+    def test_find(self):
+        Data = np.array([
+            [1, 1, 66],
+            [1, 2, 77],
+            [1, 3, 88],
+            [1, 4, 99],
+        ])
+
+        data = MOTM.SingleFrameData(Data)
+
+        self.assertEqual(data.total_elements, 4)
+        self.assertEqual(data.elements_left, 4)
+
+        obj = data.find(1)
+        self.assertEqual(obj[0], 1)
+        self.assertEqual(obj[1], 66)
+
+        obj = data.find(2)
+        self.assertEqual(obj[0], 2)
+        self.assertEqual(obj[1], 77)
+
+
+        obj = data.find(88)
+        self.assertEqual(obj, None)
+
+
+
     def test_multiple_delete(self):
         Data = np.array([
             [1, 1, 99],

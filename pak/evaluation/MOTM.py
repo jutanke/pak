@@ -5,6 +5,8 @@ import numpy as np
 from pak.utils import extract_eq
 from scipy.optimize import linear_sum_assignment
 
+HIGH_VALUE = 999999999
+
 def evaluate(Gt, Hy, T, calc_cost):
     """ Runs the Multiple Object Tracking Metrics algorithm
 
@@ -68,16 +70,16 @@ def evaluate(Gt, Hy, T, calc_cost):
     # "t" is the true frame number that can be any integer
     # "t_pos" is the respective integer that starts at 0 ...
     for t_pos, t in enumerate(range(first_frame, last_frame + 1)):
-        Ot = extract_eq(Gt, col=0, value=t)
-        Ht = extract_eq(Hy, col=0, value=t)
-        g[t_pos], _ = Ot.shape  # count number of objects in t
+        Ot = SingleFrameData(extract_eq(Gt, col=0, value=t))
+        Ht = SingleFrameData(extract_eq(Hy, col=0, value=t))
+        g[t_pos] = Ot.total_elements  # count number of objects in t
 
         # ----------------------------------
         # verify if old match is still valid!
         # ----------------------------------
         for (o, h) in M.get_matches(t-1):
             oid, hid = o[0], h[0]
-            o_cur = extract_eq(Ot, col=1, value=oid)
+            #o_cur = extract_eq(Ot, col=1, value=oid)
             assert len(o_cur) < 2
             if len(o_cur) == 1:
                 # o also exists in the current frame..
@@ -94,6 +96,9 @@ def evaluate(Gt, Hy, T, calc_cost):
     return fp, m, mme, c, d, g
 
 
+# =============================================
+# Helper data structures
+# =============================================
 # ---
 class SingleFrameData:
     """ handles the data for a single frame
@@ -117,6 +122,49 @@ class SingleFrameData:
                 self.lookup[pid].append(dobj)
             else:
                 self.lookup[pid] = [dobj]
+
+
+    def has(self, o):
+        """ Tests if the dataframe has the given pid or not
+        """
+        pid = o[0]
+        return pid in self.lookup
+
+
+    def find(self, pid):
+        """ find the given object
+        """
+        if pid in self.lookup:
+            assert len(self.lookup[pid]) == 1
+            return self.lookup[pid][0]
+        else:
+            return None
+
+
+    def find_best(self, pid, target, cost_fun):
+        """ finds the best object with given pid for the target
+            target: [pid, ..DATA..]
+        """
+        global HIGH_VALUE
+        if pid in self.lookup:
+            A = self.lookup[pid]
+            if len(A) > 1:
+                lowest_cost = HIGH_VALUE
+                lowest = None
+                a = target[1:]
+                for other in A:
+                    b = other[1:]
+                    cost = cost_fun(a,b)
+                    if cost < lowest_cost:
+                        lowest_cost = cost
+                        lowest = other
+
+                assert lowest is not None
+                return lowest
+            else:
+                return A[0]
+        else:
+            return None
 
 
     def remove(self, o):
