@@ -95,6 +95,66 @@ def evaluate(Gt, Hy, T, calc_cost):
 
 
 # ---
+class SingleFrameData:
+    """ handles the data for a single frame
+        Data: [
+            (frame, pid, ..DATA..),
+            ...
+        ]
+    """
+    def __init__(self, data):
+        assert len(np.unique(data[:,0])) == 1  # ensure single frame
+        self.lookup = {}
+
+        n, _ = data.shape
+        self.elements_left = n
+        self.total_elements = n
+
+        for d in data:
+            dobj = d[1:]
+            pid = d[1]
+            if pid in self.lookup:
+                self.lookup[pid].append(dobj)
+            else:
+                self.lookup[pid] = [dobj]
+
+
+    def remove(self, o):
+        """
+        o: [pid, ..DATA..]
+        """
+        pid = o[0]
+        assert pid in self.lookup
+        self.elements_left -= 1  # count-down
+        if len(self.lookup[pid]) > 1:
+            # find closest and delete
+            delete_index = -1
+            for i, other in enumerate(self.lookup[pid]):
+                delete_index = i
+                for left,right in zip(o, other):  # check all positions
+                    if left != right:
+                        delete_index = -1
+                        break
+                if delete_index > -1:
+                    break
+            assert delete_index > -1
+            self.lookup[pid].pop(delete_index)
+        else:
+            del self.lookup[pid]
+
+
+    def as_list(self):
+        """ returns the rest of the elements as list
+        """
+        #TODO this function is very inefficient
+        result = []
+        for key in self.lookup.keys():
+            for item in self.lookup[key]:
+                result.append(item)
+        return result
+
+
+# ---
 class MatchLookup:
     """ Lookup for the Matches
     """
