@@ -159,6 +159,44 @@ class TestEvaluation(unittest.TestCase):
         self.assertEqual(np.sum(c), 2)
 
 
+    def test_motm_cross(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 2, 2],
+            [2, 1, 1, 1],
+            [2, 2, 1, 1],
+            [3, 1, 2, 2],
+            [3, 2, 0, 0]
+        ])
+
+        Hy = np.array([
+            [1, 2, 2, 2],
+            [1, 1, 0, 0],
+            [2, 2, 1, 1],
+            [2, 1, 1, 1],
+            [3, 1, 2, 2],
+            [3, 2, 0, 0]
+        ])
+
+        cost = lambda a, b: la.norm(a-b)
+
+        fp, m, mme, c, d, g = MOTM.evaluate(Gt, Hy, 1.3, cost)
+
+        self.assertEqual(len(fp), 3)
+        self.assertEqual(len(m), 3)
+        self.assertEqual(len(mme), 3)
+        self.assertEqual(len(c), 3)
+        self.assertEqual(len(d), 3)
+        self.assertEqual(len(g), 3)
+
+        self.assertEqual(np.sum(fp), 0)
+        self.assertEqual(np.sum(m), 0)
+        self.assertEqual(np.sum(mme), 0)
+        self.assertEqual(np.sum(d), 0)
+        self.assertEqual(np.sum(g), 6)
+        self.assertEqual(np.sum(c), 6)
+
+
     def test_motm_interrupt(self):
         Gt = np.array([
             [1, 1, 0, 0],
