@@ -60,7 +60,7 @@ class TestMatchLookup(unittest.TestCase):
 
     def test_multiple_inserts(self):
         M = MOTM.MatchLookup(1,2)
-        o,h = (1, None), (95, None)
+        o,h = (1, None), (95.5, None)
         M.insert_match(1, o, h)
         o,h = (2, None), (96, None)
         M.insert_match(1, o, h)

@@ -3,6 +3,7 @@
 # Multiple-Object tracking Metrics
 import numpy as np
 from pak.utils import extract_eq
+from math import ceil, floor
 from scipy.optimize import linear_sum_assignment
 
 HIGH_VALUE = 999999999
@@ -41,6 +42,11 @@ def evaluate(Gt, Hy, T, calc_cost):
     global HIGH_VALUE
     first_frame = np.min(Gt[:,0])
     last_frame = np.max(Gt[:,0])
+    assert floor(first_frame) == ceil(first_frame)  # make sure the
+    assert floor(last_frame) == ceil(last_frame)    # values are integers
+    first_frame = int(first_frame)
+    last_frame = int(last_frame)
+
     number_of_frames = last_frame - first_frame + 1
 
     fp = [0] * number_of_frames
