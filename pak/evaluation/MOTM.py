@@ -136,10 +136,14 @@ class SingleFrameData:
         ]
     """
     def __init__(self, data):
-        assert len(np.unique(data[:,0])) == 1  # ensure single frame
         self.lookup = {}
 
-        n, _ = data.shape
+        if len(data) == 0:
+            n = 0
+        else:
+            assert len(np.unique(data[:,0])) == 1  # ensure single frame
+            n, _ = data.shape
+
         self.elements_left = n
         self.total_elements = n
 
@@ -253,6 +257,9 @@ class MatchLookup:
         pos = t - self.first_frame
         assert self.matches[pos] is None
         self.matches[pos] = []
+
+        assert self.lookups[pos] is None
+        self.lookups[pos] = {}
 
 
     def insert_match(self, t, o, h):

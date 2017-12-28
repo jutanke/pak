@@ -9,6 +9,17 @@ from pak.evaluation import MOTM
 
 class TestSingleFrameData(unittest.TestCase):
 
+    def test_empty(self):
+        Data = np.array([])
+
+        data = MOTM.SingleFrameData(Data)
+
+        self.assertEqual(data.total_elements, 0)
+        self.assertEqual(data.elements_left, 0)
+        A = data.as_list()
+        self.assertEqual(len(A), 0)
+
+
     def test_setup(self):
         Data = np.array([
             [1, 1, None],
