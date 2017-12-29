@@ -101,7 +101,7 @@ def evaluate(Gt, Hy, T, calc_cost):
         row_ind, col_ind = linear_sum_assignment(C)
 
         for i, j in zip(row_ind, col_ind):
-            o_cur, h_cur, cost = Ot_ummatched[j], Ht_unmatched[i], C[i,j]
+            o_cur, h_cur, cost = Ot_ummatched[i], Ht_unmatched[j], C[i,j]
             if cost < T:
                 Ot.remove(o_cur)
                 Ht.remove(h_cur)

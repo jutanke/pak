@@ -9,6 +9,37 @@ from pak.evaluation import MOTM
 
 class TestEvaluation(unittest.TestCase):
 
+    def test_motm_duplicate(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+
+        Hy = np.array([
+            [1, 1, 10, 10],
+            [1, 1, 0, 0],
+            [2, 1, 0, 0]
+        ])
+
+        cost = lambda a, b: la.norm(a-b)
+
+        fp, m, mme, c, d, g = MOTM.evaluate(Gt, Hy, 10, cost)
+
+        self.assertEqual(len(fp), 2)
+        self.assertEqual(len(m), 2)
+        self.assertEqual(len(mme), 2)
+        self.assertEqual(len(c), 2)
+        self.assertEqual(len(d), 2)
+        self.assertEqual(len(g), 2)
+
+        self.assertEqual(np.sum(fp), 0)
+        self.assertEqual(np.sum(m), 0)
+        self.assertEqual(np.sum(mme), 0)
+        self.assertEqual(np.sum(d), 0)
+        self.assertEqual(np.sum(g), 3)
+        self.assertEqual(np.sum(c), 3)
+
     def test_motm(self):
         Gt = np.array([
             [1, 1, 0, 0],
