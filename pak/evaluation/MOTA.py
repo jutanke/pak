@@ -35,7 +35,7 @@ def evaluate(Gt, Hy, threshold, info=False):
             'FN': FN,
             'FP': FP,
             'IDSW': IDSW,
-            'GT', GT
+            'GT': GT
         }
     else:
         return mota
