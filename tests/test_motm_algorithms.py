@@ -42,6 +42,21 @@ class TestMOTM_algorithms(unittest.TestCase):
         result = MOTA.evaluate(Gt, Hy, T)
         self.assertEqual(result, 1)
 
+    def test_simple_MOTA_different_ids(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 20, 10, 10],
+            [1, 10, 0, 0],
+            [2, 10, 0, 0]
+        ])
+        T = 1
+
+        result = MOTA.evaluate(Gt, Hy, T)
+        self.assertEqual(result, 1)
 
     def test_simple_MOTP(self):
         Gt = np.array([
