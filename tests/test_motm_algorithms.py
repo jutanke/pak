@@ -23,8 +23,79 @@ class TestMOTM_algorithms(unittest.TestCase):
         T = 1
 
         result = MOTA.evaluate(Gt, Hy, T)
-        print('RES', result)
-        #self.assertEqual(result, 0, 0.)
+        self.assertEqual(result, 1)
+
+    def test_simple_MOTA_with_info(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10],
+            [1, 1, 0, 0],
+            [2, 1, 0, 0]
+        ])
+        T = 1
+
+        result, info = MOTA.evaluate(Gt, Hy, T, info=True)
+        self.assertEqual(result, 1)
+
+    def test_simple_MOTA_with_info_with_FP(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10],
+            [2, 2, 10, 10],
+            [1, 1, 0, 0],
+            [2, 1, 0, 0]
+        ])
+        T = 1
+
+        result, info = MOTA.evaluate(Gt, Hy, T, info=True)
+        self.assertEqual(info['FP'], 1)
+        self.assertEqual(info['FN'], 0)
+        self.assertEqual(info['IDSW'], 0)
+
+    def test_simple_MOTA_with_info_with_FN(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10],
+            [1, 1, 0, 0],
+            [2, 1, 0, 0]
+        ])
+        T = 1
+
+        result, info = MOTA.evaluate(Gt, Hy, T, info=True)
+        self.assertEqual(info['FP'], 0)
+        self.assertEqual(info['FN'], 1)
+        self.assertEqual(info['IDSW'], 0)
+
+    def test_simple_MOTA_with_info_with_IDSW(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10],
+            [1, 1, 0, 0],
+            [2, 2, 0, 0]
+        ])
+        T = 1
+
+        result, info = MOTA.evaluate(Gt, Hy, T, info=True)
+        self.assertEqual(info['FP'], 0)
+        self.assertEqual(info['FN'], 0)
+        self.assertEqual(info['IDSW'], 1)
 
     def test_simple_MOTA(self):
         Gt = np.array([

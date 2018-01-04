@@ -2,7 +2,7 @@ import numpy as np
 import numpy.linalg as la
 from pak.evaluation import MOTM
 
-def evaluate(Gt, Hy, threshold):
+def evaluate(Gt, Hy, threshold, info=False):
     """ Ground-truth vs hypothesis for the
         Multiple Object Tracking Accuracy
 
@@ -15,7 +15,8 @@ def evaluate(Gt, Hy, threshold):
         ]
 
         threshold: after which no correspondence is possible
-
+        info: if info is True the FN, FP, and IDSW values are returned
+              as well
 
         The result values are in the range of [-infinity, 1)
     """
@@ -27,4 +28,13 @@ def evaluate(Gt, Hy, threshold):
     IDSW = np.sum(mme)
     GT = np.sum(g)
 
-    return 1 - (FN + FP + IDSW) / GT
+    mota = 1 - (FN + FP + IDSW) / GT
+
+    if info:
+        return mota, {
+            'FN': FN,
+            'FP': FP,
+            'IDSW': IDSW
+        }
+    else:
+        return mota
