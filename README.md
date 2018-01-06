@@ -24,6 +24,9 @@ pip install git+https://github.com/justayak/pak.git
 pip install git+https://github.com/justayak/pppr.git
 ```
 
+## [Evaluation](https://github.com/justayak/pak/tree/master/pak/evaluation)
+
+This library offers some of the common evaluation strategies
 
 ## Datasets
 
