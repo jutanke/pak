@@ -17,6 +17,12 @@ pip install git+https://github.com/justayak/pak.git
 * scipy
 * skimage
 * h5py
+* pppr (for evaluation)
+
+#### Install [pppr](https://github.com/justayak/pppr)
+```bash
+pip install git+https://github.com/justayak/pppr.git
+```
 
 
 ## Datasets
