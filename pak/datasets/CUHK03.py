@@ -148,5 +148,5 @@ class cuhk03(Dataset):
 
         if not Y_is_loaded:
             np.save(fydata, Y)
-        
+
         return X, Y
