@@ -9,6 +9,58 @@ from pak.evaluation import MOTP, MOTA
 
 class TestMOTM_algorithms(unittest.TestCase):
 
+
+    def test_MOTA_aabb_idsw(self):
+        Gt = np.array([
+            [1, 1, 0, 0, 1, 1],
+            [1, 2, 1, 1, 1, 1],
+            [2, 1, 0, 0, 1, 1],
+            [2, 2, 1, 1, 1, 1],
+        ])
+        Hy = np.array([
+            [1, 2, 1, 1, 1, 1],
+            [1, 1, 0, 0, 1, 1],
+            [2, 2, 0, 0, 1, 1],
+            [2, 1, 1, 1, 1, 1]
+        ])
+        T = 0.5
+        result, info = MOTA.evaluate_aabb(Gt, Hy, T, info=True)
+
+        self.assertEqual(info['IDSW'], 2)
+        self.assertEqual(result, 0.5)
+
+    def test_MOTA_aabb_complete_lost(self):
+        Gt = np.array([
+            [1, 1, 0, 0, 0.4, 0.4],
+            [1, 2, 10, 10, 0.4, 0.4],
+            [2, 1, 0, 0, 0.4, 0.4]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10, 1, 1],
+            [1, 1, 0, 0, 1, 1],
+            [2, 1, 0, 0, 1, 1]
+        ])
+        T = 0.5
+
+        result, info = MOTA.evaluate_aabb(Gt, Hy, T, info=True)
+        self.assertEqual(result, -1)
+
+    def test_simple_MOTA_aabb(self):
+        Gt = np.array([
+            [1, 1, 0, 0, 1, 1],
+            [1, 2, 10, 10, 1, 1],
+            [2, 1, 0, 0, 1, 1]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10, 1, 1],
+            [1, 1, 0, 0, 1, 1],
+            [2, 1, 0, 0, 1, 1]
+        ])
+        T = 0.5
+
+        result = MOTA.evaluate_aabb(Gt, Hy, T)
+        self.assertEqual(result, 1)
+
     def test_simple_MOTA_small_dev(self):
         Gt = np.array([
             [1, 1, 0.1, -0.1],
