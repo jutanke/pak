@@ -27,8 +27,8 @@ def remove_duplicates(X, score_fun):
         returns {np.array} with the same structure as X but with only a single
                 id per frame.
     """
-    last_frame = np.max(X[:,0])
-    first_frame = np.min(X[:,0])
+    last_frame = int(np.max(X[:,0]))
+    first_frame = int(np.min(X[:,0]))
     assert last_frame > 0 and first_frame > 0 and last_frame >= first_frame
 
     X_result = []
