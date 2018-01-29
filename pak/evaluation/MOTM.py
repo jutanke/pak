@@ -8,7 +8,7 @@ from scipy.optimize import linear_sum_assignment
 
 HIGH_VALUE = 999999999
 
-def evaluate(Gt, Hy, T, calc_cost):
+def evaluate(Gt, Hy, T, calc_cost, debug_info=False):
     """ Runs the Multiple Object Tracking Metrics algorithm
 
         Gt: Ground-truth: [
@@ -27,6 +27,9 @@ def evaluate(Gt, Hy, T, calc_cost):
         calc_cost: {function} that gets the ..DATA.. term
             as parameter: e.g. for points it could calculate
             the distance, for aabb's it could calculate IoU..
+
+        debug_info: {boolean} if True we get the actual Gt-Hy pairs
+            that created FP, FN and MME
 
         return:
             fp: List<Integer> of false-positives
@@ -57,6 +60,10 @@ def evaluate(Gt, Hy, T, calc_cost):
     g = [0] * number_of_frames
 
     M = MatchLookup(first_frame, last_frame)
+
+    if debug_info:
+        FP_pairs = []; FN_pairs = []; MME_pairs = []
+        Gt_local2global = LocalFrameIdToGlobal(Gt); Hy_local2global = LocalFrameIdToGlobal(Hy)
 
     # ----------------------------
     # "t" is the true frame number that can be any integer
@@ -108,6 +115,11 @@ def evaluate(Gt, Hy, T, calc_cost):
                 M.insert_match(t, o_cur, h_cur)
                 if M.has_mismatch(t, o_cur, h_cur):
                     mme[t_pos] += 1
+                    if debug_info:  # only do this if we want debug infos
+                        MME_pairs.append((
+                            Gt_local2global.get_true_idx(t, i),
+                            Hy_local2global.get_true_idx(t, j)
+                        ))
 
         # ----------------------------------
         # handle unmatched rest
@@ -115,8 +127,20 @@ def evaluate(Gt, Hy, T, calc_cost):
         c[t_pos] = M.count_matches(t)
         fp[t_pos] = Ht.elements_left
         assert fp[t_pos] >= 0
+        if debug_info:  # only do this if we want debug infos
+            for _, leftovers in Ht.lookup.items():
+                for leftover in leftovers:
+                    item = [t]; item.extend(leftover)
+                    FP_pairs.append(item)
+
         m[t_pos] = Ot.elements_left
         assert m[t_pos] >= 0
+        if debug_info:  # only do this if we want debug infos
+            for _, leftovers in Ot.lookup.items():
+                for leftover in leftovers:
+                    item = [t]; item.extend(leftover)
+                    FN_pairs.append(item)
+
 
         # ----------------------------------
         # calculate cost between all matches
@@ -127,12 +151,46 @@ def evaluate(Gt, Hy, T, calc_cost):
         d[t_pos] = cost_sum
 
     # ----------------------------
-    return fp, m, mme, c, d, g
+
+    if debug_info:
+        return fp, m, mme, c, d, g, \
+               np.array(FN_pairs), np.array(FP_pairs), np.array(MME_pairs)
+    else:
+        return fp, m, mme, c, d, g
 
 
 # =============================================
 # Helper data structures
 # =============================================
+
+class LocalFrameIdToGlobal:
+    """
+        Converts the local frame id (for frame n) to the global frame id
+    """
+
+    def __init__(self, L):
+        """
+        :param L: {np.array} list of items:
+            [
+                [frame, pid, ... ],
+            ]
+        """
+        self.lookup = {}
+        for idx, elem in enumerate(L):
+            frame = int(elem[0])
+            if not frame in self.lookup:
+                self.lookup[frame] = []
+            self.lookup[frame].append(idx)
+
+    def get_true_idx(self, frame, idx):
+        """
+        :param frame: {int} frame number
+        :param idx: {int} index for the frame
+        :return:
+        """
+        return self.lookup[frame][idx]
+
+
 # ---
 class SingleFrameData:
     """ handles the data for a single frame
@@ -161,12 +219,10 @@ class SingleFrameData:
             else:
                 self.lookup[pid] = [dobj]
 
-
     def has(self, pid):
         """ Tests if the dataframe has the given pid or not
         """
         return pid in self.lookup
-
 
     def find(self, pid):
         """ find the given object
@@ -176,7 +232,6 @@ class SingleFrameData:
             return self.lookup[pid][0]
         else:
             return None
-
 
     def find_best(self, pid, target, cost_fun):
         """ finds the best object with given pid for the target
@@ -202,7 +257,6 @@ class SingleFrameData:
                 return A[0]
         else:
             return None
-
 
     def remove(self, o):
         """
@@ -252,7 +306,6 @@ class MatchLookup:
         self.lookups = [None] * number_of_frames
         self.count_matches_in_t = [0] * number_of_frames
 
-
     def init(self, t):
         """ initializes the set in the case of no matches
 
@@ -266,7 +319,6 @@ class MatchLookup:
 
         assert self.lookups[pos] is None
         self.lookups[pos] = {}
-
 
     def insert_match(self, t, o, h):
         """ insert a (o,h) match
@@ -290,13 +342,11 @@ class MatchLookup:
         self.lookups[pos][o[0]] = h[0]
         self.count_matches_in_t[pos] += 1
 
-
     def count_matches(self, t):
         """ counts the number of matches in frame t
         """
         pos = t - self.first_frame
         return self.count_matches_in_t[pos]
-
 
     def has_mismatch(self, t, o, h):
         """ checks if there is a mismatch in the t-1 time stemp
@@ -313,7 +363,11 @@ class MatchLookup:
         hid = h[0]
         if oid in self.lookups[pos]:
             return self.lookups[pos][oid] != hid
-
+        else:
+            for o, h in self.lookups[pos].items():
+                if h == hid:
+                    return o != oid
+        return False
 
     def get_matches(self, t):
         """ gets all matches at frame t

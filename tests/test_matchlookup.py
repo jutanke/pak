@@ -1,11 +1,9 @@
 import unittest
 import sys
 sys.path.insert(0, '../')
-import numpy as np
-from math import sqrt
-import numpy.linalg as la
 
 from pak.evaluation import MOTM
+
 
 class TestMatchLookup(unittest.TestCase):
 
@@ -51,6 +49,18 @@ class TestMatchLookup(unittest.TestCase):
         o,h = (1, None), (99, None)
         M.insert_match(1, o, h)
         o,h = (1, None), (88, None)
+        M.insert_match(2, o, h)
+        self.assertFalse(M.has_mismatch(1, o, h))
+        self.assertTrue(M.has_mismatch(2, o, h))
+
+        self.assertEqual(M.count_matches(1), 1)
+        self.assertEqual(M.count_matches(2), 1)
+
+    def test_mismatch_inverse(self):
+        M = MOTM.MatchLookup(1,2)
+        o,h = (1, None), (99, None)
+        M.insert_match(1, o, h)
+        o,h = (2, None), (99, None)
         M.insert_match(2, o, h)
         self.assertFalse(M.has_mismatch(1, o, h))
         self.assertTrue(M.has_mismatch(2, o, h))
