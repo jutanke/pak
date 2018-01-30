@@ -93,6 +93,45 @@ class TestMOTM_algorithms(unittest.TestCase):
         result, info = MOTA.evaluate(Gt, Hy, T, info=True)
         self.assertEqual(result, 1)
 
+    def test_simple_MOTA_with_info_and_debug(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10],
+            [1, 1, 0, 0],
+            [2, 1, 0, 0]
+        ])
+        T = 1
+
+        result, info, debug = MOTA.evaluate(Gt, Hy, T, info=True, debug_info=True)
+        self.assertEqual(result, 1)
+        self.assertEqual(len(debug['FN']), 0)
+        self.assertEqual(len(debug['FP']), 0)
+        self.assertEqual(len(debug['IDSW']), 0)
+
+    def test_simple_MOTA_with_debug(self):
+        Gt = np.array([
+            [1, 1, 0, 0],
+            [1, 2, 10, 10],
+            [2, 1, 0, 0]
+        ])
+        Hy = np.array([
+            [1, 2, 10, 10],
+            [1, 1, 0, 0],
+            [2, 1, 0, 0]
+        ])
+        T = 1
+
+        result, debug = MOTA.evaluate(Gt, Hy, T, info=False, debug_info=True)
+        self.assertEqual(result, 1)
+        self.assertEqual(len(debug['FN']), 0)
+        self.assertEqual(len(debug['FP']), 0)
+        self.assertEqual(len(debug['IDSW']), 0)
+
+
     def test_simple_MOTA_with_info_with_FP(self):
         Gt = np.array([
             [1, 1, 0, 0],

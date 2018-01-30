@@ -52,7 +52,11 @@ def evaluate(Gt, Hy, threshold, info=False, debug_info=False):
 
 
 def _evaluate(Gt, Hy, threshold, cost_fun, info=False, debug_info=False):
-    fp, m, mme, c, d, g = MOTM.evaluate(Gt, Hy, threshold, cost_fun, debug_info=debug_info)
+    if debug_info:
+        fp, m, mme, c, d, g, FN_pairs, FP_pairs, MME_pairs = MOTM.evaluate(
+            Gt, Hy, threshold, cost_fun, debug_info=True)
+    else:
+        fp, m, mme, c, d, g = MOTM.evaluate(Gt, Hy, threshold, cost_fun)
 
     FN = np.sum(m)
     FP = np.sum(fp)
@@ -61,12 +65,24 @@ def _evaluate(Gt, Hy, threshold, cost_fun, info=False, debug_info=False):
 
     mota = 1 - (FN + FP + IDSW) / GT
 
+    result = [mota]
+
     if info:
-        return mota, {
+        result.append({
             'FN': FN,
             'FP': FP,
             'IDSW': IDSW,
             'GT': GT
-        }
+        })
+
+    if debug_info:
+        result.append({
+            "FN": FN_pairs,
+            "FP": FP_pairs,
+            "IDSW": MME_pairs
+        })
+
+    if len(result) > 1:
+        return result
     else:
-        return mota
+        return result[0]
