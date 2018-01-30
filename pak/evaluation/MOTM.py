@@ -8,6 +8,7 @@ from scipy.optimize import linear_sum_assignment
 
 HIGH_VALUE = 999999999
 
+
 def evaluate(Gt, Hy, T, calc_cost, debug_info=False):
     """ Runs the Multiple Object Tracking Metrics algorithm
 

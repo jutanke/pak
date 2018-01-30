@@ -4,7 +4,7 @@ from pppr import aabb
 from pak.evaluation import MOTM
 
 
-def evaluate_aabb(Gt, Hy, threshold, info=False):
+def evaluate_aabb(Gt, Hy, threshold, info=False, debug_info=False):
     """ Ground-truth vs hypothesis for the
         Multiple Object Tracking Accuracy
 
@@ -26,10 +26,10 @@ def evaluate_aabb(Gt, Hy, threshold, info=False):
         The result values are in the range of [-infinity, 1)
     """
     cost_fun = lambda a, b: 1 - aabb.IoU(a, b)
-    return _evaluate(Gt, Hy, threshold, cost_fun, info)
+    return _evaluate(Gt, Hy, threshold, cost_fun, info, debug_info=debug_info)
     
 
-def evaluate(Gt, Hy, threshold, info=False):
+def evaluate(Gt, Hy, threshold, info=False, debug_info=False):
     """ Ground-truth vs hypothesis for the
         Multiple Object Tracking Accuracy
 
@@ -48,11 +48,11 @@ def evaluate(Gt, Hy, threshold, info=False):
         The result values are in the range of [-infinity, 1)
     """
     cost_fun = lambda a, b: la.norm(a-b)
-    return _evaluate(Gt, Hy, threshold, cost_fun, info)
+    return _evaluate(Gt, Hy, threshold, cost_fun, info, debug_info=debug_info)
 
 
-def _evaluate(Gt, Hy, threshold, cost_fun, info=False):
-    fp, m, mme, c, d, g = MOTM.evaluate(Gt, Hy, threshold, cost_fun)
+def _evaluate(Gt, Hy, threshold, cost_fun, info=False, debug_info=False):
+    fp, m, mme, c, d, g = MOTM.evaluate(Gt, Hy, threshold, cost_fun, debug_info=debug_info)
 
     FN = np.sum(m)
     FP = np.sum(fp)
