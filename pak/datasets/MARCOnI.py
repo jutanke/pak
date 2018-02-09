@@ -33,6 +33,126 @@ class MARCOnI(Dataset):
         self.download_set("Juggling")
         self.download_set("Run2")
 
+    def fix_annotations(self, name, cam, frame, individuals):
+        """ the annotations are sometimes a bit fuzzy, e.g.
+            it is often not clear which annotation belongs to
+            which individual and when an individual leaves
+            frame it is unclear how to handle this
+        """
+        if name == "Soccer":
+            assert len(individuals) == 1
+            if cam == 0:
+                if (frame >= 239 and frame <= 240) or \
+                (frame >= 334 and frame <= 343):
+                    return [None, individuals[0]]  # mark first pid as hidden
+            if cam == 1:
+                if (frame >= 170 and frame <= 173) or \
+                    (frame == 275) or (frame == 315) or (frame == 336):
+                    return [None, individuals[0]]  # mark first pid as hidden
+                elif (frame == 301):
+                    return [individuals[0], None]  # mark second pid as hidden
+            if cam == 2:
+                if (frame == 215) or (frame >= 218 and frame <= 219):
+                    return [None, individuals[0]]  # mark first pid as hidden
+                elif (frame == 115) or (frame == 212) or\
+                    (frame >= 350 and frame <= 351) or \
+                    (frame == 367):
+                    return [individuals[0], None]  # mark second pid as hidden
+            if cam == 3:
+                if (frame == 295) or (frame == 297):
+                    return [None, individuals[0]]  # mark first pid as hidden
+                elif (frame == 463):
+                    return [individuals[0], None]  # mark second pid as hidden
+            if cam == 4:
+                if (frame == 284) or (frame == 328) or\
+                    (frame >= 331 and frame <= 332) or\
+                    (frame >= 334 and frame <= 335) or (frame == 339) or\
+                    (frame >= 381 and frame <= 392) or\
+                    (frame == 395) or (frame == 397) or\
+                    (frame >= 477 and frame <= 478) or\
+                    (frame == 479):
+                    return [None, individuals[0]]  # mark first pid as hidden
+
+        assert False, "this code should never be reached. Cam:" + str(cam) +\
+                        " Frame:" + str(frame) + " @" + name
+
+
+    def get_annotations(self, NAME):
+        """ read the annotation matlab file
+        """
+        root_dir = join(self.root, 'marconi/' + NAME)
+        fAnnot = join(root_dir, 'Annotations.mat')
+
+        annolist = loadmat(fAnnot)['annolist'][0]
+
+        num_cams,num_frames,h,w,_ = self.get_video_shape(NAME)
+        num_individuals = -1
+
+        annotation_per_camera = []
+        for _ in range(num_cams):
+            annotation_per_camera.append([])
+
+        for elem in annolist:
+            name,individuals,_ = elem
+            name = name[0][0][0][0]
+            current_cam = int(name[-11:-9])
+            current_frame = int(name[-8:-4])
+
+            # we need to make sure that we have annotations for each frame
+            assert current_frame == len(annotation_per_camera[current_cam])
+
+            annotation_per_individuum = []
+
+            individuals = individuals[0]
+
+            if num_individuals < 0:
+                num_individuals = len(individuals)
+            elif len(individuals) != num_individuals:
+                individuals = self.fix_annotations(
+                    NAME,current_cam,current_frame,individuals)
+
+            for individual in individuals:
+                if individual is None:
+                    annotation_per_individuum.append(None)
+                else:
+                    a,b,c,d,e,f,g,h,j = individual
+                    a = a[0][0]; b = b[0][0]
+                    c = c[0][0]; d = d[0][0]
+                    e = e[0][0]; g = g[0][0]; f = f[0]
+
+                    head_top_left = (min(a, c), min(b, d))
+                    head_bottom_right = (max(a, c), max(b, d))
+
+                    Joints = np.zeros((12, 3), 'uint16')
+                    joints = h[0][0][0][0]
+                    for jidx, joint in enumerate(joints):
+                        x, y, pid, visible = joint
+                        x = x[0][0];  y = y[0][0];
+                        pid = pid[0][0]; visible = visible[0][0]
+                        Joints[pid,0] = x
+                        Joints[pid,1] = y
+                        Joints[pid,2] = visible
+
+                    annotation_per_individuum.append(
+                        ((head_top_left, head_bottom_right),
+                        Joints)
+                    )
+
+            annotation_per_camera[current_cam].append(
+                annotation_per_individuum)
+
+        return annotation_per_camera
+
+        # for cam in range(num_cams):
+        #     # check the annotation for each camera
+        #     annotation_per_frame = []
+
+
+
+
+
+
+
 
     def get_memmapped_file_names(self, name):
         """ get the file names for the memmaped files
