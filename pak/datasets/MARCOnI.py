@@ -178,11 +178,6 @@ class MARCOnI(Dataset):
             del X
 
 
-
-
-
-
-
     def download_set(self, name):
         """ download the given set
         """

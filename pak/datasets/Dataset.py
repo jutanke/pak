@@ -1,6 +1,6 @@
 import numpy as np
-import zipfile
-import tarfile
+# import zipfile
+# import tarfile
 import urllib.request
 import shutil
 from os import makedirs, listdir
@@ -11,6 +11,7 @@ from scipy.io import loadmat
 from skimage.transform import resize
 from pak import utils
 from pak.util import mpii_human_pose as mpii_hp
+from pak.util import unzip
 import h5py
 from enum import Enum
 
@@ -107,15 +108,16 @@ class Dataset:
                     utils.talk(url + " downloaded..", self.verbose)
                     shutil.copyfileobj(res, f)
 
-            if fzip.endswith('.zip'):
-                utils.talk("unzip " + fzip + " -> " + root, self.verbose)
-                zip_ref = zipfile.ZipFile(fzip, 'r')
-                zip_ref.extractall(export_folder)
-                zip_ref.close()
-            elif fzip.endswith('tar.gz'):
-                utils.talk("untar " + fzip + " -> " + root, self.verbose)
-                tar = tarfile.open(fzip, 'r:gz')
-                tar.extractall(export_folder)
-                tar.close()
+            unzip.unzip(fzip, export_folder, self.verbose)
+            # if fzip.endswith('.zip'):
+            #     utils.talk("unzip " + fzip + " -> " + root, self.verbose)
+            #     zip_ref = zipfile.ZipFile(fzip, 'r')
+            #     zip_ref.extractall(export_folder)
+            #     zip_ref.close()
+            # elif fzip.endswith('tar.gz'):
+            #     utils.talk("untar " + fzip + " -> " + root, self.verbose)
+            #     tar = tarfile.open(fzip, 'r:gz')
+            #     tar.extractall(export_folder)
+            #     tar.close()
         else:
             utils.talk(dest + ' found :)', self.verbose)
