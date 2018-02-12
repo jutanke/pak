@@ -25,6 +25,16 @@ class Dataset:
         self.root = root
         self.root_export = root
         self.verbose = verbose
+
+        # This is a horrible hack but it seems that
+        # the python tools cannot unzip certain zip files
+        # (that seem to be zipped on OSX) and I have no
+        # time to find a 'good' solution so the ugly hack
+        # is: use the system tools which for some reason
+        # work! (on LINUX!!) --> see MARCOnI
+        self.force_unzip_with_os_tools = False
+
+
         if not exists(root):
             makedirs(root)
 
@@ -108,16 +118,7 @@ class Dataset:
                     utils.talk(url + " downloaded..", self.verbose)
                     shutil.copyfileobj(res, f)
 
-            unzip.unzip(fzip, export_folder, self.verbose)
-            # if fzip.endswith('.zip'):
-            #     utils.talk("unzip " + fzip + " -> " + root, self.verbose)
-            #     zip_ref = zipfile.ZipFile(fzip, 'r')
-            #     zip_ref.extractall(export_folder)
-            #     zip_ref.close()
-            # elif fzip.endswith('tar.gz'):
-            #     utils.talk("untar " + fzip + " -> " + root, self.verbose)
-            #     tar = tarfile.open(fzip, 'r:gz')
-            #     tar.extractall(export_folder)
-            #     tar.close()
+            unzip.unzip(fzip, export_folder, self.verbose,
+                self.force_unzip_with_os_tools)
         else:
             utils.talk(dest + ' found :)', self.verbose)

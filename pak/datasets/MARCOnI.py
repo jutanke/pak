@@ -21,6 +21,15 @@ class MARCOnI(Dataset):
     def __init__(self, root, verbose=True):
         Dataset.__init__(self, 'marconi', root, verbose)
         utils.talk('(MARCOnl)', verbose)
+
+        # This is a horrible hack but it seems that
+        # the python tools cannot unzip certain zip files
+        # (that seem to be zipped on OSX) and I have no
+        # time to find a 'good' solution so the ugly hack
+        # is: use the system tools which for some reason
+        # work! (on LINUX!!) --> see MARCOnI
+        self.force_unzip_with_os_tools = True
+        
         self._verbose = verbose
         self.root_export = join(root, 'marconi')
         self.download_set("Soccer")
@@ -59,37 +68,40 @@ class MARCOnI(Dataset):
 
             annotation_per_individuum = []
 
-            individuals = individuals[0]
+            if len(individuals) == 0:  # there are NO detections in this frame
+                annotation_per_camera[current_cam].append([])
+            else:
+                individuals = individuals[0]
 
-            for individual in individuals:
-                if individual is None:
-                    annotation_per_individuum.append(None)
-                else:
-                    a,b,c,d,e,f,g,h,j = individual
-                    a = a[0][0]; b = b[0][0]
-                    c = c[0][0]; d = d[0][0]
-                    e = e[0][0]; g = g[0][0]; f = f[0]
+                for individual in individuals:
+                    if individual is None:
+                        annotation_per_individuum.append(None)
+                    else:
+                        a,b,c,d,e,f,g,h,j = individual
+                        a = a[0][0]; b = b[0][0]
+                        c = c[0][0]; d = d[0][0]
+                        e = e[0][0]; g = g[0][0]; f = f[0]
 
-                    head_top_left = (min(a, c), min(b, d))
-                    head_bottom_right = (max(a, c), max(b, d))
+                        head_top_left = (min(a, c), min(b, d))
+                        head_bottom_right = (max(a, c), max(b, d))
 
-                    Joints = np.zeros((12, 3), 'uint16')
-                    joints = h[0][0][0][0]
-                    for jidx, joint in enumerate(joints):
-                        x, y, pid, visible = joint
-                        x = x[0][0];  y = y[0][0];
-                        pid = pid[0][0]; visible = visible[0][0]
-                        Joints[pid,0] = x
-                        Joints[pid,1] = y
-                        Joints[pid,2] = visible
+                        Joints = np.zeros((12, 3), 'uint16')
+                        joints = h[0][0][0][0]
+                        for jidx, joint in enumerate(joints):
+                            x, y, pid, visible = joint
+                            x = x[0][0];  y = y[0][0];
+                            pid = pid[0][0]; visible = visible[0][0]
+                            Joints[pid,0] = x
+                            Joints[pid,1] = y
+                            Joints[pid,2] = visible
 
-                    annotation_per_individuum.append(
-                        ((head_top_left, head_bottom_right),
-                        Joints)
-                    )
+                        annotation_per_individuum.append(
+                            ((head_top_left, head_bottom_right),
+                            Joints)
+                        )
 
-            annotation_per_camera[current_cam].append(
-                annotation_per_individuum)
+                annotation_per_camera[current_cam].append(
+                    annotation_per_individuum)
 
         return annotation_per_camera
 
@@ -200,6 +212,7 @@ class MARCOnI(Dataset):
 
             n = len(Cam_Ids)  # number of cameras
 
+            print("CREATE NEW MEMMAP:", (n, m, h, w))
             X = np.memmap(fImages, dtype='uint8', mode='w+', shape=(n, m, h, w, 3))
 
             for c, Images in enumerate(Camera_Images):
