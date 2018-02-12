@@ -233,6 +233,22 @@ X, Y = egohand.get_raw(memmapped=True)
 
 ![egohands](https://user-images.githubusercontent.com/831215/33382371-da8a84a0-d520-11e7-8e87-95c5aba8e814.png)
 
+### MARCOnI
+[MARker-less Motion Capture in Outdoor and Indoor Scenes](http://marconi.mpi-inf.mpg.de/#overview)[9] is a test data set for marker-less motcap methods.
+[Sample code](https://github.com/justayak/pak/blob/master/samples/MARCOnI.ipynb)
+
+```python
+from pak.datasets.MARCOnI import MARCOnI
+
+marconi = MARCOnI(root)
+# if the library cannot find the data in the given directory it
+# will download it and place it there..
+
+X, CNN, Annotations = marconi['Soccer']
+```
+
+![marconi_img](https://user-images.githubusercontent.com/831215/36093006-902b7ac8-0fe9-11e8-92a6-c5507f454fa1.png)
+
 
 # References
 
@@ -253,3 +269,5 @@ X, Y = egohand.get_raw(memmapped=True)
 [7] Mittal, Arpit, Andrew Zisserman, and Philip HS Torr. "Hand detection using multiple proposals." BMVC. 2011.
 
 [8] Bambach, Sven, et al. "Lending a hand: Detecting hands and recognizing activities in complex egocentric interactions." Proceedings of the IEEE International Conference on Computer Vision. 2015.
+
+[9] Elhayek, Ahmed, et al. "Efficient ConvNet-based marker-less motion capture in general scenes with a low number of cameras." Computer Vision and Pattern Recognition (CVPR), 2015 IEEE Conference on. IEEE, 2015.
