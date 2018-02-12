@@ -17,6 +17,18 @@ def bb_to_plt_plot(x, y, w, h):
     Y = [y, y+h, y+h, y,   y]
     return X, Y
 
+
+def tl_br_to_plt_plot(t, l, b, r):
+    """ converts two points, top-left and bottom-right into
+        bounding box plot data
+    """
+    assert t < b and l < r
+    w = r - l; h = b - t
+    X = [l, l, l+w, l+w, l]
+    Y = [t, t+h, t+h, t, t]
+    return X, Y
+
+
 def extract_eq(data, col, value):
     """ extract all rows from the data table
         where the values of the column = value
@@ -79,4 +91,3 @@ def plot(mats, cols=5, cmap=plt.get_cmap('gray'), size=16):
     plt.axis('off')
     plt.tight_layout()
     plt.show()
-

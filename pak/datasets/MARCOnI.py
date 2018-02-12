@@ -33,49 +33,6 @@ class MARCOnI(Dataset):
         self.download_set("Juggling")
         self.download_set("Run2")
 
-    def fix_annotations(self, name, cam, frame, individuals):
-        """ the annotations are sometimes a bit fuzzy, e.g.
-            it is often not clear which annotation belongs to
-            which individual and when an individual leaves
-            frame it is unclear how to handle this
-        """
-        if name == "Soccer":
-            assert len(individuals) == 1
-            if cam == 0:
-                if (frame >= 239 and frame <= 240) or \
-                (frame >= 334 and frame <= 343):
-                    return [None, individuals[0]]  # mark first pid as hidden
-            if cam == 1:
-                if (frame >= 170 and frame <= 173) or \
-                    (frame == 275) or (frame == 315) or (frame == 336):
-                    return [None, individuals[0]]  # mark first pid as hidden
-                elif (frame == 301):
-                    return [individuals[0], None]  # mark second pid as hidden
-            if cam == 2:
-                if (frame == 215) or (frame >= 218 and frame <= 219):
-                    return [None, individuals[0]]  # mark first pid as hidden
-                elif (frame == 115) or (frame == 212) or\
-                    (frame >= 350 and frame <= 351) or \
-                    (frame == 367):
-                    return [individuals[0], None]  # mark second pid as hidden
-            if cam == 3:
-                if (frame == 295) or (frame == 297):
-                    return [None, individuals[0]]  # mark first pid as hidden
-                elif (frame == 463):
-                    return [individuals[0], None]  # mark second pid as hidden
-            if cam == 4:
-                if (frame == 284) or (frame == 328) or\
-                    (frame >= 331 and frame <= 332) or\
-                    (frame >= 334 and frame <= 335) or (frame == 339) or\
-                    (frame >= 381 and frame <= 392) or\
-                    (frame == 395) or (frame == 397) or\
-                    (frame >= 477 and frame <= 478) or\
-                    (frame == 479):
-                    return [None, individuals[0]]  # mark first pid as hidden
-
-        assert False, "this code should never be reached. Cam:" + str(cam) +\
-                        " Frame:" + str(frame) + " @" + name
-
 
     def get_annotations(self, NAME):
         """ read the annotation matlab file
@@ -86,7 +43,6 @@ class MARCOnI(Dataset):
         annolist = loadmat(fAnnot)['annolist'][0]
 
         num_cams,num_frames,h,w,_ = self.get_video_shape(NAME)
-        num_individuals = -1
 
         annotation_per_camera = []
         for _ in range(num_cams):
@@ -104,12 +60,6 @@ class MARCOnI(Dataset):
             annotation_per_individuum = []
 
             individuals = individuals[0]
-
-            if num_individuals < 0:
-                num_individuals = len(individuals)
-            elif len(individuals) != num_individuals:
-                individuals = self.fix_annotations(
-                    NAME,current_cam,current_frame,individuals)
 
             for individual in individuals:
                 if individual is None:
@@ -143,15 +93,6 @@ class MARCOnI(Dataset):
 
         return annotation_per_camera
 
-        # for cam in range(num_cams):
-        #     # check the annotation for each camera
-        #     annotation_per_frame = []
-
-
-
-
-
-
 
 
     def get_memmapped_file_names(self, name):
@@ -177,7 +118,14 @@ class MARCOnI(Dataset):
         CNN = np.memmap(fCNNs, dtype='uint8', mode='r', shape=
             (n, m, int(h/2), int(w/2), 14))
 
-        return X, CNN
+        Annot = self.get_annotations(name)
+        assert len(Annot) == n,\
+            'annotations and videos do not have the same number of cameras'
+        for annot_per_cam in Annot:
+            assert len(annot_per_cam) == m, \
+                'annotations and videos do not have the same number of frames'
+
+        return X, CNN, Annot
 
 
     def get_video_shape(self, name):
