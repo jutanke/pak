@@ -1,22 +1,47 @@
 from pak.datasets.Dataset import Dataset
 import numpy as np
-import zipfile
-import tarfile
-import urllib.request
-import shutil
 from os import makedirs, listdir
 from os.path import join, isfile, isdir, exists, splitext
 from scipy.ndimage import imread
-from scipy.misc import imresize
 from scipy.io import loadmat
-from skimage.transform import resize
 from pak import utils
-import h5py
-from enum import Enum
+
 
 class MARCOnI(Dataset):
     """ MPII http://marconi.mpi-inf.mpg.de/#download
     """
+
+    # ---------- STATIC ------------
+    @staticmethod
+    def get_image_file_extension(name):
+        """
+        different videos have different file extensions (jpg vs png)
+        :param name: name of the video
+        :return: the correct image file extensio
+        """
+        if name in ["Soccer", "Kickbox", "Soccer2", "Volleyball", "Walk1", "Walk2"]:
+            return "jpg"
+        elif name in ["SBoard"]:
+            return "png"
+        else:
+            raise Exception("Could not find MARCOnI name:" + name)
+
+    # @staticmethod
+    # def get_cnn_to_image_factor(name):
+    #     """
+    #     different videos have different scaling factors for the size of the
+    #     CNN detectors in comparison to the video
+    #     :param name: of the video
+    #     :return: factor: cnn_w = image_w/factor, cnn_h = image_h/factor
+    #     """
+    #     if name in ["Soccer", "Kickbox"]:
+    #         return 2
+    #     elif name in ["SBoard"]:
+    #         return 4
+    #     else:
+    #         raise Exception("Could not find MARCOnI name:" + name)
+
+    # ------------------------------
 
     def __init__(self, root, verbose=True):
         Dataset.__init__(self, 'marconi', root, verbose)
@@ -29,7 +54,7 @@ class MARCOnI(Dataset):
         # is: use the system tools which for some reason
         # work! (on LINUX!!) --> see MARCOnI
         self.force_unzip_with_os_tools = True
-        
+
         self._verbose = verbose
         self.root_export = join(root, 'marconi')
         self.download_set("Soccer")
@@ -41,7 +66,6 @@ class MARCOnI(Dataset):
         self.download_set("Volleyball")
         self.download_set("Juggling")
         self.download_set("Run2")
-
 
     def get_annotations(self, NAME):
         """ read the annotation matlab file
@@ -77,10 +101,28 @@ class MARCOnI(Dataset):
                     if individual is None:
                         annotation_per_individuum.append(None)
                     else:
-                        a,b,c,d,e,f,g,h,j = individual
+                        if len(individual) == 9:
+                            a,b,c,d,_,_,_,h,_ = individual
+                            if len(h[0]) == 0:  # missing data
+                                annotation_per_individuum.append(None)
+                                continue
+                        elif len(individual) == 8:
+                            a,b,c,d,e,_,h,_ = individual
+                            if len(h) == 0:  # missing data
+                                annotation_per_individuum.append(None)
+                                continue
+                        elif len(individual) == 6 or \
+                                len(individual) == 7:  # missing data
+                            annotation_per_individuum.append(None)
+                            continue
+                        else:
+                            raise Exception("weird individual annotation:" +
+                                            str(current_cam) + "/" + str(current_frame) + \
+                                            " len:" + str(len(individual)))
+
                         a = a[0][0]; b = b[0][0]
                         c = c[0][0]; d = d[0][0]
-                        e = e[0][0]; g = g[0][0]; f = f[0]
+                        #e = e[0][0]; g = g[0][0]; f = f[0]
 
                         head_top_left = (min(a, c), min(b, d))
                         head_bottom_right = (max(a, c), max(b, d))
@@ -105,8 +147,6 @@ class MARCOnI(Dataset):
 
         return annotation_per_camera
 
-
-
     def get_memmapped_file_names(self, name):
         """ get the file names for the memmaped files
         """
@@ -115,7 +155,6 @@ class MARCOnI(Dataset):
         fCNNs = join(root_dir, 'CNN_Detections.npy')
         fAnnot = join(root_dir, 'Annotations.npy')
         return fImages, fCNNs, fAnnot
-
 
     def __getitem__(self, name):
         """ [ access ]
@@ -127,8 +166,8 @@ class MARCOnI(Dataset):
         X = np.memmap(fImages, dtype='uint8', mode='r', shape=shape)
 
         n, m, h, w, _ = shape
-        CNN = np.memmap(fCNNs, dtype='uint8', mode='r', shape=
-            (n, m, int(h/2), int(w/2), 14))
+        #CNN = np.memmap(fCNNs, dtype='uint8', mode='r', shape=
+        #    (n, m, int(h/2), int(w/2), 14))
 
         Annot = self.get_annotations(name)
         assert len(Annot) == n,\
@@ -137,8 +176,8 @@ class MARCOnI(Dataset):
             assert len(annot_per_cam) == m, \
                 'annotations and videos do not have the same number of frames'
 
-        return X, CNN, Annot
-
+        #return X, CNN, Annot
+        return X, Annot
 
     def get_video_shape(self, name):
         """ get the data shape for the given data
@@ -147,15 +186,16 @@ class MARCOnI(Dataset):
         image_dir = join(root_dir, join('Images', 'Images'))
         assert isdir(image_dir), 'Image directory must exist ->' + image_dir
 
+        file_extension = MARCOnI.get_image_file_extension(name)  # jpg vs png
         Cam_Ids = sorted(list(
-            set([f[6:8] for f in listdir(image_dir) if f.endswith('.jpg')])))
+            set([f[6:8] for f in listdir(image_dir) if f.endswith(file_extension)])))
 
         Camera_Images = []
         m = -1  # number of frames per camera
         w, h = -1, -1  # width/height of videos
         for cam_id in Cam_Ids:
             Images = sorted([join(image_dir, f) for f in listdir(image_dir) if \
-                f.endswith('.jpg') and f.startswith('frame_' + cam_id)])
+                f.endswith(file_extension) and f.startswith('frame_' + cam_id)])
             Camera_Images.append(Images)
             if m < 0:
                 m = len(Images)
@@ -170,8 +210,7 @@ class MARCOnI(Dataset):
                 assert w == w_ and h == h_
 
         n = len(Cam_Ids)  # number of cameras
-        return (n, m, h, w, 3)
-
+        return n, m, h, w, 3
 
     def create_memmapped_data(self, name):
         """ create the memory-mapped dataset for the given sub-set
@@ -179,6 +218,7 @@ class MARCOnI(Dataset):
         root_dir = join(self.root, 'marconi/' + name)
         assert isdir(root_dir), 'directory ' + root_dir + " must exist!"
 
+        file_extension = MARCOnI.get_image_file_extension(name)  # jpg vs png
         fImages, fCNNs, fAnnot = self.get_memmapped_file_names(name)
 
         # ----------------------------
@@ -189,14 +229,14 @@ class MARCOnI(Dataset):
             assert isdir(image_dir), 'Image directory must exist ->' + image_dir
 
             Cam_Ids = sorted(list(
-                set([f[6:8] for f in listdir(image_dir) if f.endswith('.jpg')])))
+                set([f[6:8] for f in listdir(image_dir) if f.endswith('.' + file_extension)])))
 
             Camera_Images = []
             m = -1  # number of frames per camera
             w, h = -1, -1  # width/height of videos
             for cam_id in Cam_Ids:
                 Images = sorted([join(image_dir, f) for f in listdir(image_dir) if \
-                    f.endswith('.jpg') and f.startswith('frame_' + cam_id)])
+                    f.endswith('.' + file_extension) and f.startswith('frame_' + cam_id)])
                 Camera_Images.append(Images)
                 if m < 0:
                     m = len(Images)
@@ -212,7 +252,6 @@ class MARCOnI(Dataset):
 
             n = len(Cam_Ids)  # number of cameras
 
-            print("CREATE NEW MEMMAP:", (n, m, h, w))
             X = np.memmap(fImages, dtype='uint8', mode='w+', shape=(n, m, h, w, 3))
 
             for c, Images in enumerate(Camera_Images):
@@ -227,37 +266,38 @@ class MARCOnI(Dataset):
         # ----------------------------
         #     CNN detections
         # ----------------------------
-        if not isfile(fCNNs):
-            cnn_dir = join(root_dir, join('CNN_Detections', 'CNN_Detections'))
-            assert isdir(cnn_dir), 'CNN-Detection folder must exist ->' + cnn_dir
-
-            Cam_Ids_cnn = sorted(list(
-                set([f[0:8] for f in listdir(cnn_dir) if f.endswith('.png')])))
-            assert len(Cam_Ids_cnn) == n
-
-            joints = ["j%03d.png" % (j,) for j in range(1, 15)]
-
-            CNNs = []
-            for cam_id in Cam_Ids_cnn:
-                Joints = []
-                for j in joints:
-                    J = sorted([join(cnn_dir, f) for f in listdir(cnn_dir) if \
-                        f.startswith(cam_id) and f.endswith(j)])
-                    assert len(J) == m
-                    Joints.append(J)
-
-                CNNs.append(Joints)
-
-            X = np.memmap(fCNNs, dtype='uint8', mode='w+', shape=
-                (n, m, int(h/2), int(w/2), 14))
-
-            for c, cnn in enumerate(CNNs):
-                for j, J in enumerate(cnn):
-                    J = np.array([imread(f) for f in J], 'uint8')
-                    X[c,:,:,:,j] = J
-
-            del X
-
+        # if not isfile(fCNNs):
+        #     cnn_dir = join(root_dir, join('CNN_Detections', 'CNN_Detections'))
+        #     assert isdir(cnn_dir), 'CNN-Detection folder must exist ->' + cnn_dir
+        #
+        #     Cam_Ids_cnn = sorted(list(
+        #         set([f[0:8] for f in listdir(cnn_dir) if f.endswith('.png')])))
+        #     assert len(Cam_Ids_cnn) == n
+        #
+        #     joints = ["j%03d.png" % (j,) for j in range(1, 15)]
+        #
+        #     CNNs = []
+        #     for cam_id in Cam_Ids_cnn:
+        #         Joints = []
+        #         for j in joints:
+        #             J = sorted([join(cnn_dir, f) for f in listdir(cnn_dir) if \
+        #                 f.startswith(cam_id) and f.endswith(j)])
+        #             assert len(J) == m
+        #             Joints.append(J)
+        #
+        #         CNNs.append(Joints)
+        #
+        #     cnn_factor = MARCOnI.get_cnn_to_image_factor(name)
+        #
+        #     X = np.memmap(fCNNs, dtype='uint8', mode='w+', shape=
+        #         (n, m, int(h/cnn_factor), int(w/cnn_factor), 14))
+        #
+        #     for c, cnn in enumerate(CNNs):
+        #         for j, J in enumerate(cnn):
+        #             J = np.array([imread(f) for f in J], 'uint8')
+        #             X[c,:,:,:,j] = J
+        #
+        #     del X
 
     def download_set(self, name):
         """ download the given set
@@ -269,10 +309,10 @@ class MARCOnI(Dataset):
             dest_folder='marconi/' + name + "/Images", dest_force=True,
             root_folder='marconi/' + name)
 
-        url = 'http://resources.mpi-inf.mpg.de/marconi/Data/' + name + '/CNN_Detections.zip'
-        self.download_and_unzip(url, zipfile_name='CNN_Detections.zip',
-            dest_folder='marconi/' + name + "/CNN_Detections", dest_force=True,
-            root_folder='marconi/' + name)
+        # url = 'http://resources.mpi-inf.mpg.de/marconi/Data/' + name + '/CNN_Detections.zip'
+        # self.download_and_unzip(url, zipfile_name='CNN_Detections.zip',
+        #     dest_folder='marconi/' + name + "/CNN_Detections", dest_force=True,
+        #     root_folder='marconi/' + name)
 
         self.root_export = join(self.root, 'marconi')
         url = 'http://resources.mpi-inf.mpg.de/marconi/Data/' + name + \
