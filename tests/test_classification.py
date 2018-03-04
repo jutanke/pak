@@ -2,10 +2,8 @@ import unittest
 import sys
 sys.path.insert(0, '../')
 import numpy as np
-from math import sqrt
-import numpy.linalg as la
-
 from pak.evaluation import one_hot_classification as ohc
+
 
 class TestClassification(unittest.TestCase):
 

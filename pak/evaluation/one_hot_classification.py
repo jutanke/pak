@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def accuracy(Y, Y_):
     """ calculate the one-hot vector accuracy
 
