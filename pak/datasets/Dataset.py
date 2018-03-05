@@ -1,19 +1,12 @@
 import numpy as np
-# import zipfile
-# import tarfile
+import zipfile
+import tarfile
 import urllib.request
 import shutil
 from os import makedirs, listdir
 from os.path import join, isfile, isdir, exists, splitext
-from scipy.ndimage import imread
-from scipy.misc import imresize
-from scipy.io import loadmat
-from skimage.transform import resize
 from pak import utils
-from pak.util import mpii_human_pose as mpii_hp
 from pak.util import unzip
-import h5py
-from enum import Enum
 
 
 class Dataset:

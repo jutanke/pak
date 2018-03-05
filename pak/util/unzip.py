@@ -2,6 +2,8 @@ import zipfile
 import tarfile
 import subprocess
 from pak import utils
+import lzma
+
 
 def has_os_unzip():
     """ Checks if an OS tool for unzipping is installed
@@ -63,3 +65,8 @@ def unzip(fzip, export_folder, verbose=False, force_os_tools=False):
             tar = tarfile.open(fzip, 'r:gz')
             tar.extractall(export_folder)
             tar.close()
+
+        elif fzip.endswith('.xz'):
+            lzma_f = lzma.open(fzip)
+            lzma_f.extractall(export_folder)
+            lzma_f.close()
