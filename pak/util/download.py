@@ -42,7 +42,6 @@ def download_with_login(url, dir, user, password):
     command = ['wget',
                '--http-user=' + user,
                '--http-passwd=' + password,
-               '-i',
                url]
     if not isdir(dir):
         makedirs(dir)

@@ -8,6 +8,9 @@ from PIL import Image
 from os.path import join, isfile, exists
 
 
+def get_filename_from_url(url):
+    return url.split('/')[-1]
+
 def bb_to_plt_plot(x, y, w, h):
     """ Converts a bounding box to parameters
         for a plt.plot([..], [..])
