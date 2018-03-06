@@ -3,6 +3,8 @@ import tarfile
 import subprocess
 from pak import utils
 import lzma
+import time
+import os
 
 
 def has_os_unzip():
@@ -28,7 +30,8 @@ def unzip_using_os_tools(fzip, export_folder, verbose):
     utils.talk('\terr:\t' + str(err), verbose)
 
 
-def unzip(fzip, export_folder, verbose=False, force_os_tools=False):
+def unzip(fzip, export_folder, verbose=False, force_os_tools=False,
+          del_after_unzip=False):
     """
         @param fzip: {String} full path to the zip-file
         @param export_folder: {String} place to unzip
@@ -40,6 +43,7 @@ def unzip(fzip, export_folder, verbose=False, force_os_tools=False):
                                 time to find a 'good' solution so the ugly hack
                                 is: use the system tools which for some reason
                                 work! (on LINUX!!)
+        @param del_after_unzip: delete after unzipping
     """
     if force_os_tools:
         assert has_os_unzip()
@@ -70,3 +74,7 @@ def unzip(fzip, export_folder, verbose=False, force_os_tools=False):
             lzma_f = lzma.open(fzip)
             lzma_f.extractall(export_folder)
             lzma_f.close()
+
+        if del_after_unzip:
+            time.sleep(0.5)  # just to be sure sleep some time
+            os.remove(fzip)

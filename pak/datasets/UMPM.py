@@ -27,8 +27,6 @@ class UMPM:
             fzip = join(cur_loc, file + ".zip")
             cur_url = root_url + file + '.zip'
 
-            print("ZIP:", isfile(fzip))
-
             # fc3d_gt = join(data_root, file + '.c3d')
             # cur_url_gt = root_url_gt + file + '.c3d'
 
@@ -46,17 +44,25 @@ class UMPM:
             if not isdir(join(cur_loc, 'Groundtruth')):
                 # is not unzipped
                 utils.talk("unzipping " + fzip, verbose)
-                unzip.unzip(fzip, cur_loc)
+                unzip.unzip(fzip, cur_loc, del_after_unzip=True)
 
             # if not isfile(fc3d_gt):
             #     utils.talk("could not find c3d file " + file, verbose)
             #     download.download_with_login(cur_url_gt, cur_loc, username, password)
 
-
     # -------- static --------
 
     @staticmethod
     def get_file_list():
+        return [
+                   'p1_chair_2',
+                   'p1_grab_3',
+                   'p1_orthosyn_1'
+                   ]
+
+
+    @staticmethod
+    def get_file_list_ALL():
         """
         :return: all the files stored on the server
         """
