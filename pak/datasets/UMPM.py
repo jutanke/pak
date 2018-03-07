@@ -46,6 +46,12 @@ class UMPM:
                 utils.talk("unzipping " + fzip, verbose)
                 unzip.unzip(fzip, cur_loc, del_after_unzip=True)
 
+            video_loc = join(cur_loc, 'Video')
+            lzma_videos = [join(video_loc, f) for f in listdir(video_loc) if f.endswith('.xz')]
+            for lzma_video in lzma_videos:
+                utils.talk('unzipping video ' + lzma_video, verbose)
+                unzip.unzip(lzma_video, video_loc, del_after_unzip=True)
+
             # if not isfile(fc3d_gt):
             #     utils.talk("could not find c3d file " + file, verbose)
             #     download.download_with_login(cur_url_gt, cur_loc, username, password)
@@ -55,10 +61,19 @@ class UMPM:
     @staticmethod
     def get_file_list():
         return [
-                   'p1_chair_2',
-                   'p1_grab_3',
-                   'p1_orthosyn_1'
-                   ]
+           'p1_grab_3',
+           'p1_orthosyn_1',
+            'p1_table_2',
+            'p1_triangle_1',
+            'p2_ball_1',
+            'p2_chair_1',
+            'p2_chair_2',
+            'p2_circle_01',
+            'p2_free_1',
+            'p2_free_2',
+            'p2_grab_1',
+            'p2_grab_2'
+        ]
 
 
     @staticmethod
@@ -67,7 +82,6 @@ class UMPM:
         :return: all the files stored on the server
         """
         return [
-            'p1_chair_2',
             'p1_grab_3',
             'p1_orthosyn_1',
             'p1_table_2',

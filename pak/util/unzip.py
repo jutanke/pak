@@ -2,9 +2,9 @@ import zipfile
 import tarfile
 import subprocess
 from pak import utils
-import lzma
 import time
 import os
+from os.path import isfile
 
 
 def has_os_unzip():
@@ -13,6 +13,17 @@ def has_os_unzip():
         returns True if so, o/w False
     """
     command = ["which", 'unzip']
+    process = subprocess.Popen(command, stdout=subprocess.PIPE)
+    output, err = process.communicate()
+    return len(output) > 1  # path to binary OR empty
+
+
+def has_os_unxz():
+    """ Checks if an OS tool for unxz is installed (needed for .xz files)
+
+        returns True if so, o/w False
+    """
+    command = ["which", 'unxz']
     process = subprocess.Popen(command, stdout=subprocess.PIPE)
     output, err = process.communicate()
     return len(output) > 1  # path to binary OR empty
@@ -65,16 +76,24 @@ def unzip(fzip, export_folder, verbose=False, force_os_tools=False,
                     raise
 
         elif fzip.endswith('tar.gz'):
+            mode = 'r:gz'
             utils.talk("untar " + fzip + " -> " + export_folder, verbose)
-            tar = tarfile.open(fzip, 'r:gz')
+            tar = tarfile.open(fzip, mode)
             tar.extractall(export_folder)
             tar.close()
 
         elif fzip.endswith('.xz'):
-            lzma_f = lzma.open(fzip)
-            lzma_f.extractall(export_folder)
-            lzma_f.close()
+            command = ["unxz", fzip]
+            utils.talk('\ttry unxz using OS tools', verbose)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE)
+            utils.talk('\tunxz using OS tools', verbose)
+            output, err = process.communicate()
+            process.wait()
+            utils.talk('\terr:\t' + str(err), verbose)
+        else:
+            raise RuntimeError("No unzip routine found for " + fzip)
 
         if del_after_unzip:
             time.sleep(0.5)  # just to be sure sleep some time
-            os.remove(fzip)
+            if isfile(fzip):
+                os.remove(fzip)
