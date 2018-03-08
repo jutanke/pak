@@ -212,6 +212,56 @@ class MARCOnI(Dataset):
         n = len(Cam_Ids)  # number of cameras
         return n, m, h, w, 3
 
+    def get_calibration(self, name):
+        """
+        Gets the calibration for all cameras
+        :param name:
+        :return:
+        """
+        root_dir = join(self.root, join('marconi', name))
+        assert isdir(root_dir)
+        calibration_file = join(root_dir, 'Calibration.dat')
+        assert isfile(calibration_file)
+        with open(calibration_file) as f:
+            content = f.readlines()
+
+        def read_cam(idx):
+            K_r1 = [float(s) for s in content[idx].split('  ')]
+            K_r2 = [float(s) for s in content[idx + 1].split('  ')]
+            K_r3 = [float(s) for s in content[idx + 2].replace('\n', '')
+                .replace('\t', '')
+                .split('  ') if len(s) > 2]
+
+            K = np.zeros((3, 3))
+            K[0] = K_r1;
+            K[1] = K_r2;
+            K[2] = K_r3
+
+            E_r1 = [float(s) for s in content[idx + 4].replace('\n', '')
+                .replace('\t', '')
+                .split(' ') if len(s) > 2]
+            E_r2 = [float(s) for s in content[idx + 5].replace('\n', '')
+                .replace('\t', '')
+                .split(' ') if len(s) > 2]
+            E_r3 = [float(s) for s in content[idx + 6].replace('\n', '')
+                .replace('\t', '')
+                .split(' ') if len(s) > 2]
+
+            E = np.zeros((3, 4))
+            E[0] = E_r1;
+            E[1] = E_r2;
+            E[2] = E_r3
+
+            return K @ E
+
+        Ps = []
+        n = len(content)
+        for i in range(1, n, 9):
+            Ps.append(read_cam(i))
+
+        return np.array(Ps)
+
+
     def create_memmapped_data(self, name):
         """ create the memory-mapped dataset for the given sub-set
         """
