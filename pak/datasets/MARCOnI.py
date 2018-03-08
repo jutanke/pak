@@ -212,10 +212,11 @@ class MARCOnI(Dataset):
         n = len(Cam_Ids)  # number of cameras
         return n, m, h, w, 3
 
-    def get_calibration(self, name):
+    def get_calibration(self, name, split_intrinsic_extrinsic=False):
         """
         Gets the calibration for all cameras
         :param name:
+        :param split_intrinsic_extrinsic: if True return K's and Rt's
         :return:
         """
         root_dir = join(self.root, join('marconi', name))
@@ -233,9 +234,7 @@ class MARCOnI(Dataset):
                 .split('  ') if len(s) > 2]
 
             K = np.zeros((3, 3))
-            K[0] = K_r1;
-            K[1] = K_r2;
-            K[2] = K_r3
+            K[0] = K_r1; K[1] = K_r2; K[2] = K_r3
 
             E_r1 = [float(s) for s in content[idx + 4].replace('\n', '')
                 .replace('\t', '')
@@ -248,19 +247,22 @@ class MARCOnI(Dataset):
                 .split(' ') if len(s) > 2]
 
             E = np.zeros((3, 4))
-            E[0] = E_r1;
-            E[1] = E_r2;
-            E[2] = E_r3
+            E[0] = E_r1; E[1] = E_r2; E[2] = E_r3
 
-            return K @ E
+            return K @ E, K, E
 
-        Ps = []
+        Ps = []; Ks = []; Rts = []
         n = len(content)
         for i in range(1, n, 9):
-            Ps.append(read_cam(i))
+            P, K, Rt = read_cam(i)
+            Ps.append(P)
+            Ks.append(K)
+            Rts.append(Rt)
 
-        return np.array(Ps)
-
+        if split_intrinsic_extrinsic:
+            return np.array(Ps), np.array(Ks), np.array(Rts)
+        else:
+            return np.array(Ps)
 
     def create_memmapped_data(self, name):
         """ create the memory-mapped dataset for the given sub-set
