@@ -92,9 +92,9 @@ class UMPM:
                 i = 0
                 while True:
                     valid, frame = cap.read()
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     if not valid:
                         break
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     X[i] = frame
 
                     i = i + 1
