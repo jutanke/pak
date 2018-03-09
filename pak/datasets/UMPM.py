@@ -4,6 +4,7 @@ from pak import utils
 from pak.util import download, unzip
 from os import makedirs, listdir
 from os.path import join, isfile, isdir, exists, splitext
+import time
 import cv2
 
 
@@ -23,6 +24,17 @@ class UMPM:
 
         if not isdir(data_root):
             makedirs(data_root)
+
+        calib_zip = join(data_root, 'umpm_camcalib1.zip')
+        if not isfile(calib_zip):
+            calib_url = 'http://umpm-mirror.cs.uu.nl/download/umpm_camcalib1.zip'
+            download.download_with_login(calib_url, data_root, username, password)
+            assert isfile(calib_zip)
+
+        calib_dir = join(data_root, 'Calib')
+        if not isdir(calib_dir):
+            unzip.unzip(calib_zip, data_root)
+            assert isdir(calib_dir)
 
         for file in UMPM.get_file_list():
             cur_loc = join(data_root, file)
@@ -73,26 +85,69 @@ class UMPM:
         Videos = {'l': None, 'r': None, 's': None, 'f': None}
         for cam in ['l', 'r', 's', 'f']:
             fmmap = join(video_loc, name + '_' + cam + '.npy')
-            if isfile(fmmap):
-                X = np.memmap(fmmap, dtype='uint8', mode='r', shape=shape)
-            else:
+            if not isfile(fmmap):
                 avi = join(video_loc, name + '_' + cam + '.avi'); assert isfile(avi)
                 cap = cv2.VideoCapture(avi)
                 X = np.memmap(fmmap, dtype='uint8', mode='w+', shape=shape)
                 i = 0
                 while True:
                     valid, frame = cap.read()
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     if not valid:
                         break
                     X[i] = frame
+
                     i = i + 1
 
                 del X
-                X = np.memmap(fmmap, dtype='uint8', mode='r', shape=shape)
+                time.sleep(0.01)
+            X = np.memmap(fmmap, dtype='uint8', mode='r', shape=shape)
+            Videos[cam] = X
+
 
             #Videos[cam] = np.array(video)
 
         return Videos
+
+    def get_calibration(self, name):
+        """
+        Gets the calibration for a given name
+        :param name: e.g. calib_l06
+        :return:
+        """
+        calib_dir = join(self.data_root, 'Calib'); assert isdir(calib_dir)
+        Calibs = {'l': None, 'r': None, 's': None, 'f': None}
+        for cam in ['l', 'r', 's', 'f']:
+            ini_path = join(calib_dir, name + '_' + cam + '.ini')
+            assert isfile(ini_path)
+            with open(ini_path) as f:
+                content = f.readlines()
+
+            K_r1 = [float(s) for s in content[0].replace('\n', '').split(' ') \
+                    if len(s) > 0]
+            K_r2 = [float(s) for s in content[1].replace('\n', '').split(' ') \
+                    if len(s) > 0]
+            K_r3 = [float(s) for s in content[2].replace('\n', '').split(' ') \
+                    if len(s) > 0]
+            K = np.zeros((3, 3))
+            K[0] = K_r1; K[1] = K_r2; K[2] = K_r3
+
+            distCoef = [float(s) for s in content[3].replace('\n', '').split(' ') \
+                    if len(s) > 0]
+            rvec = [float(s) for s in content[4].replace('\n', '').split(' ') \
+                    if len(s) > 0]
+            tvec = [float(s) for s in content[5].replace('\n', '').split(' ') \
+                    if len(s) > 0]
+
+            Calibs[cam] = {
+                'K': K,
+                'distCoeff': distCoef,
+                'rvec': rvec,
+                'tvec': tvec
+            }
+
+        return Calibs
+
 
     # -------- static --------
 
