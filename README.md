@@ -249,6 +249,21 @@ X, CNN, Annotations = marconi['Soccer']
 
 ![marconi_img](https://user-images.githubusercontent.com/831215/36093006-902b7ac8-0fe9-11e8-92a6-c5507f454fa1.png)
 
+### UMPM
+[Utrecht Multi-Person Motion Benchmark](https://www.projects.science.uu.nl/umpm/)[10]
+
+```python
+from pak.datasets.UMPM import UMPM
+
+root = '/dir/with/data'
+user = 'username@requested@umpm'
+pwd = 'a_password'
+
+mpm = UMPM(root, user, pwd)
+
+X, Y, Calib = mpm.get_data('p1_grab_3')
+```
+![umpm](https://user-images.githubusercontent.com/831215/37305298-46b724c6-2634-11e8-81bd-68fe2ba4aada.png)
 
 # References
 
@@ -271,3 +286,5 @@ X, CNN, Annotations = marconi['Soccer']
 [8] Bambach, Sven, et al. "Lending a hand: Detecting hands and recognizing activities in complex egocentric interactions." Proceedings of the IEEE International Conference on Computer Vision. 2015.
 
 [9] Elhayek, Ahmed, et al. "Efficient ConvNet-based marker-less motion capture in general scenes with a low number of cameras." Computer Vision and Pattern Recognition (CVPR), 2015 IEEE Conference on. IEEE, 2015.
+
+[10] Van der Aa, N. P., et al. "Umpm benchmark: A multi-person dataset with synchronized video and motion capture data for evaluation of articulated human motion and interaction." Computer Vision Workshops (ICCV Workshops), 2011 IEEE International Conference on. IEEE, 2011.
