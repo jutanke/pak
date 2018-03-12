@@ -6,6 +6,8 @@ from os import makedirs, listdir
 from os.path import join, isfile, isdir, exists, splitext
 import time
 import cv2
+import json
+import c3d
 
 
 class UMPM:
@@ -70,13 +72,34 @@ class UMPM:
             #     utils.talk("could not find c3d file " + file, verbose)
             #     download.download_with_login(cur_url_gt, cur_loc, username, password)
 
-    def get_data(self, name):
+    def get_data(self, name, lock_gt_framerate=True):
         """
         :param name:
+        :param lock_gt_framerate: if True the framerate of the
+                    ground truth is reduced to match that of the
+                    Videos. Otherwise, the gt frame rate is twice as
+                    large as the video frame rate
         :return: X and C3D for the given name
         """
         cur_loc = join(self.data_root, name)
+        settings_json = join(cur_loc, name + '.json')
         assert isdir(cur_loc)
+        try:
+            settings = json.load(open(settings_json))
+        except json.JSONDecodeError:
+            # fix the bug (trailing ',' at the last position)
+            with open(settings_json, 'r') as f:
+                data = f.read().replace('\n', '').replace(' ', '')
+                data = data[0:-2] + '}'
+
+            with open(settings_json, 'w') as f:
+                f.write(data)
+
+            settings = json.load(open(settings_json))
+
+        calib_name = settings['calib']
+        calibration = self.get_calibration(calib_name)
+
         video_loc = join(cur_loc, 'Video'); assert isdir(video_loc)
         gt_loc = join(cur_loc, 'Groundtruth'); assert isdir(gt_loc)
         shape = UMPM.get_shape(name)
@@ -104,10 +127,26 @@ class UMPM:
             X = np.memmap(fmmap, dtype='uint8', mode='r', shape=shape)
             Videos[cam] = X
 
+            # ------ gt -------
+            fc3d = join(gt_loc, name + '_vm.c3d'); assert isfile(fc3d)
+            with open(fc3d, 'rb') as handle:
+                reader = c3d.Reader(handle)
+                F = reader.read_frames()
 
-            #Videos[cam] = np.array(video)
+                points = []
 
-        return Videos
+                for frame, point, analog in F:
+                    if lock_gt_framerate:
+                        if frame % 2 == 0:
+                            # skip every second frame to 'adjust'
+                            # the gt frames (100fps) to the video
+                            # frames (50fps)
+                            continue
+
+                    points.append(point)
+        assert len(points) == Videos['l'].shape[0]
+
+        return Videos, np.array(points), calibration
 
     def get_calibration(self, name):
         """
