@@ -33,11 +33,11 @@ class MPII_human_pose(Dataset):
             zipfile_name='mpii_human_pose_v1.tar.gz',
             dest_folder=join('mpii_human_pose_v1_u12_2', 'images'))
 
-
     def get_annotation(self):
         """ reads the annotation and returns it
         """
-        mat = join(self.root_export, "mpii_human_pose_v1_u12_1.mat")
+        annot_dir = join(self.root_export, 'mpii_human_pose_v1_u12_2')
+        mat = join(annot_dir, "mpii_human_pose_v1_u12_1.mat")
         M = loadmat(mat)
         M = M['RELEASE']
         AL = M['annolist'][0][0][0]
