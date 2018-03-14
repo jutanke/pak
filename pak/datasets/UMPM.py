@@ -84,6 +84,9 @@ class UMPM:
         cur_loc = join(self.data_root, name)
         settings_json = join(cur_loc, name + '.json')
         assert isdir(cur_loc)
+
+        nbr_people_in_video = int(name[1])
+
         try:
             settings = json.load(open(settings_json))
         except json.JSONDecodeError:
@@ -154,8 +157,10 @@ class UMPM:
 
                     points.append(point)
         assert len(points) == Videos['l'].shape[0]
+        points = np.array(points)
+        assert points.shape[1] == nbr_people_in_video * 15
 
-        return Videos, np.array(points), calibration
+        return Videos, points, calibration
 
     def get_calibration(self, name):
         """
