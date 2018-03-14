@@ -90,12 +90,21 @@ class UMPM:
             # fix the bug (trailing ',' at the last position)
             with open(settings_json, 'r') as f:
                 data = f.read().replace('\n', '').replace(' ', '')
-                data = data[0:-2] + '}'
+                data = data.replace(',}', '}')
+
+                if '}{' in data:
+                    # more than one entry: just drop the last one
+                    data = data.replace('}{', '},{')
+                    data = '[' + data + ']'
 
             with open(settings_json, 'w') as f:
                 f.write(data)
 
             settings = json.load(open(settings_json))
+
+        if isinstance(settings, (list,)):
+            # more than one entry: just drop the last one
+            settings = settings[0]
 
         calib_name = settings['calib']
         calibration = self.get_calibration(calib_name)
