@@ -221,13 +221,8 @@ class UMPM:
             'p1_table_2',
             'p1_triangle_1',
             'p2_ball_1',
-            'p2_chair_1',
-            'p2_chair_2',
-            'p2_circle_01',
             'p2_free_1',
-            'p2_free_2',
             'p2_grab_1',
-            'p2_grab_2',
             'p3_meet_11',
             'p4_meet_12',
         ]
