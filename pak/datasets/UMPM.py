@@ -207,25 +207,17 @@ class UMPM:
     @staticmethod
     def get_shape(name):
         return {
-            'p1_grab_3': (2827,486,644,3),
-            'p1_orthosyn_1': (2480,486,644,3),
-            'p1_table_2': (2866,486,644,3),
             'p1_triangle_1': (2471,486,644,3),
             'p2_ball_1': (2796,486,644,3),
-            'p2_chair_1': (2451,486,644,3),
             'p2_chair_2': (2677,486,644,3),
             'p2_circle_01': (2313,486,644,3),
             'p2_free_1': (2437,486,644,3),
-            'p2_free_2': (2594,486,644,3),
-            'p2_grab_1': (2410,486,644,3),
             'p2_grab_2': (2779,486,644,3)
         }[name]
 
     @staticmethod
     def get_file_list():
         return [
-           'p1_grab_3',
-           'p1_orthosyn_1',
             'p1_table_2',
             'p1_triangle_1',
             'p2_ball_1',
@@ -235,7 +227,9 @@ class UMPM:
             'p2_free_1',
             'p2_free_2',
             'p2_grab_1',
-            'p2_grab_2'
+            'p2_grab_2',
+            'p3_meet_11',
+            'p4_meet_12',
         ]
 
 
