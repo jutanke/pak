@@ -20,7 +20,6 @@ class MPII_human_pose(Dataset):
     """
 
     def __init__(self, root, verbose=True):
-        #mpii_hp.test()
         Dataset.__init__(self, 'mpii_human_pose_v1', root, verbose)
 
         url_data = 'http://datasets.d2.mpi-inf.mpg.de/andriluka14cvpr/mpii_human_pose_v1.tar.gz'
