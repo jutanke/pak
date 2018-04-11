@@ -4,6 +4,7 @@ import zipfile
 import tarfile
 import urllib.request
 import shutil
+import pickle as pkl
 from os import makedirs, listdir
 from os.path import join, isfile, isdir, exists, splitext
 from scipy.ndimage import imread
@@ -37,9 +38,14 @@ class MPII_human_pose(Dataset):
         mpii_root = self.root_export
 
         sizes_lookup = {}
-
+        
+        sizes_lookup_by_fname_pkl = join(mpii_root, 'fname_lookup.pkl')
+        sizes_lookup_by_fname = {}
+        all_files_are_loaded = isfile(sizes_lookup_by_fname_pkl)
+        
         for fname, fshape, imshape in mpii_hp.get_all_shapes():
             fpath = join(mpii_root, fname)
+            sizes_lookup_by_fname[imshape] = []
             if not isfile(fpath):
                 X = np.memmap(fpath, dtype='uint8', mode='w+', shape=fshape)
                 sizes_lookup[imshape] = (X, 0)
@@ -47,15 +53,32 @@ class MPII_human_pose(Dataset):
         img_dir = join(mpii_root, 'images/images')
         assert isdir(img_dir)
         total = len(listdir(img_dir))
-        for idx, f in enumerate(listdir(img_dir)):
-            if idx % 100 == 0:
-                print(str(idx) + '/' + str(total))
-            I = imread(join(img_dir, f))
-            shape_str = str(I.shape)
-            if shape_str in sizes_lookup:
-                X, i = sizes_lookup[shape_str]
-                X[i] = I
-                sizes_lookup[shape_str] = (X, i+1)
+        
+        if not all_files_are_loaded:
+            for idx, f in enumerate(sorted(listdir(img_dir))):
+                if idx % 100 == 0:
+                    print(str(idx) + '/' + str(total))
+                I = imread(join(img_dir, f))
+                shape_str = str(I.shape)
+                sizes_lookup_by_fname[shape_str].append(f)
+                if shape_str in sizes_lookup:
+                    X, i = sizes_lookup[shape_str]
+                    X[i] = I
+                    sizes_lookup[shape_str] = (X, i+1)
+            
+            with open(sizes_lookup_by_fname_pkl, 'wb') as f:
+                pkl.dump(sizes_lookup_by_fname, f)
+        else:
+            with open(sizes_lookup_by_fname_pkl, 'rb') as f:
+                sizes_lookup_by_fname_pkl = pkl.load(f)
+        
+        if not all_files_are_loaded:
+            for k, val in sizes_lookup.items():
+                if val is not None:
+                    del val[0]  # flush the data
+        
+        self.sizes_lookup_by_fname = sizes_lookup_by_fname
+
 
 
     def get_annotation(self):
