@@ -15,6 +15,7 @@ from pak.util import mpii_human_pose as mpii_hp
 import h5py
 from enum import Enum
 
+
 class MPII_human_pose(Dataset):
     """ MPII Human Pose dataset
     """
@@ -31,6 +32,31 @@ class MPII_human_pose(Dataset):
         self.download_and_unzip(url_data,
             zipfile_name='mpii_human_pose_v1.tar.gz',
             dest_folder=join('mpii_human_pose_v1_u12_2', 'images'))
+
+        # -- load images --
+        mpii_root = self.root_export
+
+        sizes_lookup = {}
+
+        for fname, fshape, imshape in mpii_hp.get_all_shapes():
+            fpath = join(mpii_root, fname)
+            if not isfile(fpath):
+                X = np.memmap(fpath, dtype='uint8', mode='w+', shape=fshape)
+                sizes_lookup[imshape] = (X, 0)
+
+        img_dir = join(mpii_root, 'images/images')
+        assert isdir(img_dir)
+        total = len(listdir(img_dir))
+        for idx, f in enumerate(listdir(img_dir)):
+            if idx % 100 == 0:
+                print(str(idx) + '/' + str(total))
+            I = imread(join(img_dir, f))
+            shape_str = str(I.shape)
+            if shape_str in sizes_lookup:
+                X, i = sizes_lookup[shape_str]
+                X[i] = I
+                sizes_lookup[shape_str] = (X, i+1)
+
 
     def get_annotation(self):
         """ reads the annotation and returns it
