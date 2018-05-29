@@ -40,6 +40,6 @@ class LSPE(Dataset):
 
         imgs = sorted([f for f in listdir(image_folder) if \
                         isfile(join(image_folder, f))])
-        X = np.array([imread(join(image_folder, f)) for f in imgs])
+        X = [imread(join(image_folder, f)) for f in imgs]
 
         return X, Y
