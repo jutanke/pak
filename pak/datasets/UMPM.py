@@ -218,13 +218,9 @@ class UMPM:
     @staticmethod
     def get_file_list():
         return [
-            'p1_table_2',
-            'p1_triangle_1',
             'p2_ball_1',
             'p2_free_1',
-            'p2_grab_1',
-            'p3_meet_11',
-            'p4_meet_12',
+            'p2_grab_1'
         ]
 
 
