@@ -220,7 +220,8 @@ class UMPM:
         return [
             'p2_ball_1',
             'p2_free_1',
-            'p2_grab_1'
+            'p2_grab_1',
+            'p2_chair_2'
         ]
 
 
