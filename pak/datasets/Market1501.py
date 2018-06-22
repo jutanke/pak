@@ -1,25 +1,16 @@
 from pak.datasets.Dataset import Dataset
 import numpy as np
-import zipfile
-import tarfile
-import urllib.request
-import shutil
-from os import makedirs, listdir
-from os.path import join, isfile, isdir, exists, splitext
+from os import listdir
+from os.path import join, isfile
 from scipy.ndimage import imread
 from scipy.misc import imresize
-from scipy.io import loadmat
-from skimage.transform import resize
 from pak import utils
-from pak.util import mpii_human_pose as mpii_hp
-import h5py
 import time
-from enum import Enum
+
 
 # =========================================
 #  MARKET 1501
 # =========================================
-
 class Market1501(Dataset):
     """ Market1501 dataset
     """
@@ -43,7 +34,6 @@ class Market1501(Dataset):
             w,h = force_shape
             self.force_shape = (h, w)  # as resize used inversed logic..
 
-
     def get_memmapped_file_name(self, folder):
         shape_str = ''
         force_shape = self.force_shape
@@ -52,7 +42,6 @@ class Market1501(Dataset):
 
         file_name = folder + shape_str  + '.npy'
         return join(self.root_export , file_name)
-
 
     def get_memmapped_file_shape(self, folder):
         if folder == 'bounding_box_train':
@@ -64,25 +53,21 @@ class Market1501(Dataset):
 
         force_shape = self.force_shape
         if force_shape is None:
-            h,w = 128,64
+            h, w = 128,64
         else:
-            h,w = force_shape
+            h, w = force_shape
 
-        return (n, h, w, 3)
-
+        return n, h, w, 3
 
     def get_train(self):
         return self.get_raw('bounding_box_train')
 
-
     def get_test(self):
         return self.get_raw('bounding_box_test')
-
 
     def get_raw(self, folder):
         """ gets the raw identity pictures
         """
-
         X_is_loaded = False
         if self.memmapped:
             fmmap = self.get_memmapped_file_name(folder)
@@ -90,7 +75,6 @@ class Market1501(Dataset):
             if isfile(fmmap):
                 X = np.memmap(fmmap, dtype='uint8', mode="r", shape=data_shape)
                 X_is_loaded = True
-
 
         loc = join(self.root_export, folder)
 
