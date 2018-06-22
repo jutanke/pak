@@ -1,19 +1,10 @@
 from pak.datasets.Dataset import Dataset
 import numpy as np
-import zipfile
-import tarfile
-import urllib.request
-import shutil
-from os import makedirs, listdir
-from os.path import join, isfile, isdir, exists, splitext
+from os import listdir
+from os.path import join, isfile
 from scipy.ndimage import imread
 from scipy.misc import imresize
-from scipy.io import loadmat
-from skimage.transform import resize
 from pak import utils
-from pak.util import mpii_human_pose as mpii_hp
-import h5py
-from enum import Enum
 import time
 
 
@@ -44,8 +35,8 @@ class DukeMTMC_reID(Dataset):
         assert self.can_be_memmapped()
         force_shape = self.force_shape
         shape_str = str(force_shape[0]) + 'x' + str(force_shape[1])
-        file_name = folder + shape_str  + '.npy'
-        return join(self.root_export , file_name)
+        file_name = folder + shape_str + '.npy'
+        return join(self.root_export, file_name)
 
     def get_y_file(self, folder):
         file_name = folder + "_y.npy"
@@ -61,7 +52,7 @@ class DukeMTMC_reID(Dataset):
             raise Exception("Cannot find subsystem " + folder)
 
         h,w = self.force_shape
-        return (n, h, w, 3)
+        return n, h, w, 3
 
     def get_train(self):
         return self.get_raw('bounding_box_train')
