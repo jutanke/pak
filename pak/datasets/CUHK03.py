@@ -1,20 +1,10 @@
 from pak.datasets.Dataset import Dataset
 import numpy as np
-import zipfile
-import tarfile
-import urllib.request
-import shutil
 import time
-from os import makedirs, listdir
-from os.path import join, isfile, isdir, exists, splitext
-from scipy.ndimage import imread
-from scipy.misc import imresize
-from scipy.io import loadmat
+from os.path import join, isfile
 from skimage.transform import resize
 from pak import utils
-from pak.util import mpii_human_pose as mpii_hp
 import h5py
-from enum import Enum
 
 
 class cuhk03(Dataset):
@@ -38,7 +28,6 @@ class cuhk03(Dataset):
         self.target_h = int(target_h)
         self.memmapped = memmapped
 
-
     def get_memmapped_file_name(self, folder):
         """ type is either 'detected' or 'labeled'
         """
@@ -46,13 +35,11 @@ class cuhk03(Dataset):
             '.npy'
         return join(self.memmapped_file_location, file_name)
 
-
     def get_y_file(self, folder):
         """ gives the filename for the y-data
         """
         file_name = folder + "_y.npy"
         return join(self.memmapped_file_location, file_name)
-
 
     def get_memmapped_file_shape(self, folder):
         """ gives the right size
@@ -64,7 +51,6 @@ class cuhk03(Dataset):
         else:
             raise Exception("Could not find shape for folder " + folder)
         return (n, self.target_h, self.target_w, 3)
-
 
     def get_detected(self):
         """ gets the images that were detected by a automated person detector
