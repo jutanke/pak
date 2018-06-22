@@ -7,7 +7,7 @@ interacting with the data. Please respect the respective dataset author's licens
 ## Install
 Install the library using pip:
 ```bash
-pip install git+https://github.com/justayak/pak.git
+pip install git+https://github.com/jutanke/pak.git
 ```
 
 ### Requirements 
