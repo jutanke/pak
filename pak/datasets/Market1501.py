@@ -33,6 +33,7 @@ class Market1501(Dataset):
         Dataset.__init__(self, "Market-1501-v15.09.15", root, verbose)
         self.download_and_unzip(url)
         self.root_export = join(root, "Market-1501-v15.09.15")
+        self.root_export = join(self.root_export, "Market-1501-v15.09.15")  
         self.memmapped = memmapped
 
         if force_shape is None:
