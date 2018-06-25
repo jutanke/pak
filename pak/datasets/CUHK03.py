@@ -113,10 +113,7 @@ class cuhk03(Dataset):
                 current_id += 1
 
         if not X_is_loaded:
-            X = np.array(Imgs)
             if self.memmapped:
-
-
                 utils.talk('write memmaped ' + fmmap, self.verbose)
                 data_shape = self.get_memmapped_file_shape(folder)
                 X_ = np.memmap(fmmap, dtype='uint8', mode="w+", shape=data_shape)
@@ -129,6 +126,8 @@ class cuhk03(Dataset):
                 time.sleep(3)
 
                 X = np.memmap(fmmap, dtype='uint8', mode="r", shape=data_shape)
+            else:
+                X = np.array(Imgs)
 
         Y = np.array(Ids, 'int32')
 
