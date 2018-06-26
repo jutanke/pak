@@ -1,7 +1,7 @@
 from pak.datasets.Dataset import Dataset
 import numpy as np
 from os import listdir
-from os.path import join, isfile
+from os.path import join, isfile, isdir
 from scipy.ndimage import imread
 from scipy.misc import imresize
 from pak import utils
@@ -24,7 +24,11 @@ class Market1501(Dataset):
         Dataset.__init__(self, "Market-1501-v15.09.15", root, verbose)
         self.download_and_unzip(url)
         self.root_export = join(root, "Market-1501-v15.09.15")
-        self.root_export = join(self.root_export, "Market-1501-v15.09.15")  
+        # depending on OS / unzip version / full moon the folder might be 'doubly'
+        # nested ...
+        nested_root = join(self.root_export, "Market-1501-v15.09.15")
+        if isdir(nested_root):
+            self.root_export = nested
         self.memmapped = memmapped
 
         if force_shape is None:
