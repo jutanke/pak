@@ -117,8 +117,7 @@ class cuhk03(Dataset):
                 utils.talk('write memmaped ' + fmmap, self.verbose)
                 data_shape = self.get_memmapped_file_shape(folder)
                 X_ = np.memmap(fmmap, dtype='uint8', mode="w+", shape=data_shape)
-                #X_[:] = X[:]
-                for i, x in enumerate(X):
+                for i, x in enumerate(Imgs):
                     X_[i] = x
 
                 utils.talk('flush memmaped ' + fmmap, self.verbose)
