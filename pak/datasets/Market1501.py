@@ -28,7 +28,7 @@ class Market1501(Dataset):
         # nested ...
         nested_root = join(self.root_export, "Market-1501-v15.09.15")
         if isdir(nested_root):
-            self.root_export = nested
+            self.root_export = nested_root
         self.memmapped = memmapped
 
         if force_shape is None:
