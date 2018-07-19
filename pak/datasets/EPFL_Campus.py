@@ -1,11 +1,10 @@
-from pak.datasets.Dataset import Dataset
 import numpy as np
-from pak import utils
 from pak.util import download
-from os import makedirs, listdir
-from os.path import join, isfile, isdir, exists, splitext
-import time
+from pak.util import unzip
+from os import makedirs
+from os.path import join, isfile, isdir
 import cv2
+from scipy.io import loadmat
 
 
 class EPFL_Campus:
@@ -26,75 +25,83 @@ class EPFL_Campus:
         self.verbose = verbose
         self.data_root = data_root
 
+        # download data:
+        seq_root = join(data_root, 'CampusSeq1')
+        self.seq_root = seq_root
+        if not isdir(seq_root):
+            seq_zip = join(data_root, 'CampusSeq1.zip')
+            if not isfile(seq_zip):
+                url = 'http://188.138.127.15:81/Datasets/CampusSeq1.zip'
+                if verbose:
+                    print('\ndownload ' + url)
+                download.download(url, seq_zip)
+            if verbose:
+                print('\nunzip ' + seq_zip)
+            unzip.unzip(seq_zip, data_root, verbose, del_after_unzip=True)
+
         # gt is taken from here: http://campar.in.tum.de/Chair/MultiHumanPose
-        self.P0 = np.array([
+        P0 = np.array([
             [439.06, 180.81, -26.946, 185.95],
             [-5.3416, 88.523, -450.95, 1324],
             [0.0060594, 0.99348, -0.11385, 5.227]
         ])
-        self.P1 = np.array([
+        P1 = np.array([
             [162.36, -438.34, -17.508, 3347.4],
             [73.3, -10.043, -443.34, 1373.5],
             [0.99035, -0.047887, -0.13009, 6.6849]
         ])
-        self.P2 = np.array([
+        P2 = np.array([
            [ 237.58, 679.93, -26.772, -1558.3],
            [-43.114, 21.982, -713.6, 1962.8],
            [-0.83557, 0.53325, -0.13216, 11.202]
         ])
+        self.Calib = [P0, P1, P2]
 
-    def get_sequence(self, seq_nbr):
+        # GT binary file
+        actorsGTmat = join(seq_root, 'actorsGT.mat')
+        assert isfile(actorsGTmat)
+        M = loadmat(actorsGTmat)
+        Actor3d = M['actor3D'][0]
+        persons = []
+        for pid in range(3):
+            pts = []
+            Person = Actor3d[pid]
+            n = len(Person)
+            for frame in range(n):
+                pose = Person[frame][0]
+                if len(pose) == 1:
+                    pts.append(None)
+                elif len(pose) == 14:
+                    pts.append(pose)
+                else:
+                    raise ValueError("Weird pose length:" + str(pose))
+
+            persons.append(pts)
+        self.Y = persons
+
+    def number_of_frames(self):
+        """
+        :return: number of frames
+        """
+        return 2000
+
+    def get_frame(self, frame):
         """
 
-        :param seq_nbr: can be 1 or 2
+        :param frame: {integer}
         :return:
         """
-        assert seq_nbr in [1, 2], "invalid seq nbr:" + str(seq_nbr)
-        data_root = self.data_root
-        verbose = self.verbose
-        if verbose:
-            print("[EPFL Campus] get sequence " + str(seq_nbr))
-        seq_root = join(data_root, 'Seq' + str(seq_nbr))
-        if not isdir(seq_root):
-            makedirs(seq_root)
-
-        url_root = 'https://documents.epfl.ch/groups/c/cv/cvlab-pom-video1/www/'
-        fname_base = 'campus4-c' if seq_nbr == 1 else 'campus7-c'
-
-        X = np.zeros((3, 1720, 288, 360, 3), 'uint8')
+        seq_root = self.seq_root
+        X = np.zeros((3, 288, 360, 3), 'uint8')
+        Y = []
         for cid in [0, 1, 2]:
-            if seq_nbr == 2 and cid > 0:
-                # this is a bug on their website...
-                url_root = 'https://documents.epfl.ch/groups/c/cv/cvlab-pom-video2/www/'
-            fname = fname_base + str(cid) + '.avi'
-            url = url_root + fname
-            f_loc = join(seq_root, fname)
-            if not isfile(f_loc):
-                if verbose:
-                    print("\tdownload " + fname)
-                download.download(url, f_loc)
+            img_dir = join(seq_root, 'Camera' + str(cid))
+            assert isdir(img_dir)
+            Y.append(self.Y[cid][frame])
+            fname = "campus4-c%01d-%05d.png" % (cid, frame)
+            fname = join(img_dir, fname)
+            assert isfile(fname)
 
-            if verbose:
-                print('\tload ' + fname)
-
-            cap = cv2.VideoCapture(f_loc)
-            cur_frame = 0
-            while True:
-                valid, frame = cap.read()
-                if not valid:
-                    break
-                if cur_frame == 1720:
-                    # as the videos have different
-                    # length we cut off the longer
-                    # ones...
-                    break
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                X[cid, cur_frame] = frame
-
-                cur_frame += 1
-
-            if verbose:
-                print('\tfinish loading ' + fname)
-
-        return X
-
+            im = cv2.cvtColor(cv2.imread(fname), cv2.COLOR_BGR2RGB)
+            X[cid] = im
+        return X, Y, self.Calib
