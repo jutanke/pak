@@ -1,3 +1,4 @@
+.pytest_cache/
 samples/work_on_cabbage.ipynb
 .idea/
 
