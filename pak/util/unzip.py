@@ -81,7 +81,15 @@ def unzip(fzip, export_folder, verbose=False, force_os_tools=False,
             tar = tarfile.open(fzip, mode)
             tar.extractall(export_folder)
             tar.close()
-
+        elif fzip.endswith('tar.bz2'):
+            command = ['tar', 'xvjf', fzip]
+            utils.talk('\ttry to untar using OS tools', verbose)
+            process = subprocess.Popen(command, stdout=subprocess.PIPE)
+            utils.talk('\tuntar using OS tools', verbose)
+            output, err = process.communicate()
+            process.wait()
+            utils.talk('\tuntar finished', verbose)
+            utils.talk('\t\terrors:\t' + str(err), verbose)
         elif fzip.endswith('.xz'):
             command = ["unxz", fzip]
             utils.talk('\ttry unxz using OS tools', verbose)
