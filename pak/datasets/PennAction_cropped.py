@@ -115,7 +115,6 @@ class PennAction_cropped:
         dir = join(frames_folder, vid)
         fname = '%06d.jpg' % frame
         fname = join(dir, fname)
-        print('fname', fname)
         im = cv2.cvtColor(cv2.imread(fname), cv2.COLOR_BGR2RGB)
         gt = self.meta[vid]['gt'][frame]
         return im, gt
