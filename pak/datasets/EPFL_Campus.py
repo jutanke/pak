@@ -97,7 +97,7 @@ class EPFL_Campus:
         for cid in [0, 1, 2]:
             img_dir = join(seq_root, 'Camera' + str(cid))
             assert isdir(img_dir)
-            Y.append(self.Y[cid][frame])
+            Y.append(self.Y[cid][frame])  # TODO bug?
             fname = "campus4-c%01d-%05d.png" % (cid, frame)
             fname = join(img_dir, fname)
             assert isfile(fname)
