@@ -18,6 +18,7 @@ class PennAction_cropped:
         :param root:
         :param verbose:
         """
+        EXCLUDE_VID = {'1516'}  # this videos are 'broken'
         if verbose:
             print('\n**PennAction [cropped]**')
 
@@ -59,10 +60,12 @@ class PennAction_cropped:
 
         lookup = set(validation_indices)
         self.train_ids = []
-        self.val_ids = validation_indices
+        self.val_ids = []
         for vid in ids:
-            if vid not in lookup:
+            if vid not in lookup and vid not in EXCLUDE_VID:
                 self.train_ids.append(vid)
+            elif vid not in EXCLUDE_VID:
+                self.val_ids.append(vid)
 
         # find the meta-data for each video id
 
