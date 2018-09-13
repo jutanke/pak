@@ -79,7 +79,7 @@ class PennAction_cropped:
 
             self.meta[vid] = {
                 'n_frames': n_frames[0][0],
-                'dimensions': dimensions,
+                'dimensions': np.squeeze(dimensions),
                 'gt': gt
             }
 
