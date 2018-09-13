@@ -110,10 +110,9 @@ class PennAction_cropped:
         :param frame: frame start at 0 for us!!
         :return:
         """
-        frame += 1  # but frames start at 1 for the dataset
         frames_folder = self.frames_folder
         dir = join(frames_folder, vid)
-        fname = '%06d.jpg' % frame
+        fname = '%06d.jpg' % (frame+1)  # but frames start at 1 for the dataset
         fname = join(dir, fname)
         im = cv2.cvtColor(cv2.imread(fname), cv2.COLOR_BGR2RGB)
         gt = self.meta[vid]['gt'][frame]
