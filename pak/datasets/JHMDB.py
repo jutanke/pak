@@ -42,8 +42,6 @@ class JHMDB:
                 print('-------------------')
 
             for vname in sorted(listdir(action_root)):
-                if is_memmapped:
-                    continue
                 if verbose:
                     print('[JHMDB]\t\tload ', vname)
                 video_root = join(action_root, vname)
@@ -52,24 +50,63 @@ class JHMDB:
                     join(video_root, f) for f in listdir(video_root)
                 ])
 
+                n_frames = len(video_files)
                 start_i = i
-                end_i = i + len(video_files)
+                end_i = i + n_frames
+
+                # ground truth
+                Y = []
+                gt_loc = join(person_poses, vname)
+                assert isdir(gt_loc)
+                assert len(listdir(gt_loc)) == n_frames
+                for frame in range(n_frames):
+                    fname = '%05d.txt' % (frame + 1)
+                    gt_file = join(gt_loc, fname)
+                    y = np.loadtxt(gt_file)
+                    Y.append(y)
 
                 self.videos_by_action[action][vname] = (
-                    start_i, end_i
+                    start_i, end_i, np.array(Y)
                 )
 
-                video = np.array([
-                    cv2.cvtColor(cv2.imread(f), cv2.COLOR_BGR2RGB) \
-                    for f in video_files
-                ], 'uint8')
-                for im in video:
-                    assert i < 32173
-                    X[i, :, :, :] = im
-                    i += 1
+                if not is_memmapped:
+                    video = np.array([
+                        cv2.cvtColor(cv2.imread(f), cv2.COLOR_BGR2RGB) \
+                        for f in video_files
+                    ], 'uint8')
+                    for im in video:
+                        assert i < 32173
+                        X[i, :, :, :] = im
+                        i += 1
+                else:
+                    i += len(video_files)
 
         if not is_memmapped:
-            assert i == 32173
             del X  # flush
 
+        assert i == 32173
         self.X = np.memmap(fmmap, dtype='uint8', mode='r', shape=shape)
+
+    def get_all_actions(self):
+        """
+        :return: all actions
+        """
+        return sorted(self.videos_by_action.keys())
+
+    def get_all_videos_for_action(self, action):
+        """
+        :param action:
+        :return: all videos for the given action
+        """
+        return sorted(self.videos_by_action[action].keys())
+
+    def load(self, action, video):
+        """
+        Load the video of the given action
+        :param action:
+        :param video:
+        :return:
+        """
+        start_i, end_i, gt = self.videos_by_action[action][video]
+        video = self.X[start_i:end_i, :, :, :]
+        return video, gt
