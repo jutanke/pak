@@ -18,6 +18,7 @@ class PennAction_cropped:
         :param root:
         :param verbose:
         """
+        EXCLUDE_VID = {'1516'}  # this videos are 'broken'
         if verbose:
             print('\n**PennAction [cropped]**')
 
@@ -59,10 +60,12 @@ class PennAction_cropped:
 
         lookup = set(validation_indices)
         self.train_ids = []
-        self.val_ids = validation_indices
+        self.val_ids = []
         for vid in ids:
-            if vid not in lookup:
+            if vid not in lookup and vid not in EXCLUDE_VID:
                 self.train_ids.append(vid)
+            elif vid not in EXCLUDE_VID:
+                self.val_ids.append(vid)
 
         # find the meta-data for each video id
 
@@ -79,7 +82,7 @@ class PennAction_cropped:
 
             self.meta[vid] = {
                 'n_frames': n_frames[0][0],
-                'dimensions': dimensions,
+                'dimensions': np.squeeze(dimensions),
                 'gt': gt
             }
 
@@ -110,10 +113,9 @@ class PennAction_cropped:
         :param frame: frame start at 0 for us!!
         :return:
         """
-        frame += 1  # but frames start at 1 for the dataset
         frames_folder = self.frames_folder
         dir = join(frames_folder, vid)
-        fname = '%06d.jpg' % frame
+        fname = '%06d.jpg' % (frame+1)  # but frames start at 1 for the dataset
         fname = join(dir, fname)
         im = cv2.cvtColor(cv2.imread(fname), cv2.COLOR_BGR2RGB)
         gt = self.meta[vid]['gt'][frame]
