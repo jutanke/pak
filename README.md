@@ -24,6 +24,30 @@ pip install git+https://github.com/jutanke/pak.git
 pip install git+https://github.com/justayak/pppr.git
 ```
 
+### spacepy
+Some datasets require to read the CDF file format from NASA. Install as follows [(taken from stackoverflow)](https://stackoverflow.com/questions/37232008/how-read-common-data-formatcdf-in-python).
+```bash 
+wget -r -l1 -np -nd -nc http://cdaweb.gsfc.nasa.gov/pub/software/cdf/dist/latest-release/linux/ -A cdf*-dist-all.tar.gz
+tar xf cdf*-dist-all.tar.gz -C ./
+cd cdf*dist
+apt install build-essential gfortran libncurses5-dev
+make OS=linux ENV=gnu CURSES=yes FORTRAN=no UCOPTIONS=-O2 SHARED=yes -j4 all
+make install #no sudo
+```
+Add to .bashrc:
+```bash
+export CDF_BASE=$HOME/Libraries/cdf/cdf36_3-dist
+export CDF_INC=$CDF_BASE/include
+export CDF_LIB=$CDF_BASE/lib
+export CDF_BIN=$CDF_BASE/bin
+export LD_LIBRARY_PATH=$CDF_BASE/lib:$LD_LIBRARY_PATH
+```
+Install spacepy
+```bash
+pip install git+https://github.com/spacepy/spacepy.git
+```
+
+
 ## [Evaluation](https://github.com/justayak/pak/tree/master/pak/evaluation)
 
 This library offers some of the common evaluation strategies
