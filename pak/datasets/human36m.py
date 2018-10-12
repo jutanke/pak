@@ -31,14 +31,16 @@ class Human36m:
             'WalkTogether'
         ]
 
-    def get_3d(self, actor, action, sub_action=0):
-        """
-
+    def get_cdf_file(self, type, actor, action, sub_action):
+        """ helper function to fuse together the string to
+            find the cdf file
+        :param type:
         :param actor:
         :param action:
         :param sub_action:
         :return:
         """
+        assert type in {'D3_Positions', 'D3_Angles', 'RawAngles'}
         assert actor in self.actors
         assert action in self.actions
         assert sub_action == 0 or sub_action == 1
@@ -48,7 +50,7 @@ class Human36m:
 
         root = self.root
         cdf_dir = join(join(root, actor), 'MyPoseFeatures')
-        cdf_dir = join(cdf_dir, 'D3_Positions')
+        cdf_dir = join(cdf_dir, type)
 
         videos = sorted(
             [f for f in listdir(cdf_dir) if f.startswith(action)])
@@ -67,11 +69,47 @@ class Human36m:
 
         cdf_file = join(cdf_dir, videos[sub_action])
         assert isfile(cdf_file)
+        return cdf_file
+
+    def get_3d(self, actor, action, sub_action=0):
+        """
+        :param actor:
+        :param action:
+        :param sub_action:
+        :return:
+        """
+        cdf_file = self.get_cdf_file('D3_Positions',
+                                     actor, action, sub_action)
         cdf = pycdf.CDF(cdf_file)
 
         joints3d = np.squeeze(cdf['Pose']).reshape((-1, 32, 3))
         return joints3d
 
+    def get_3d_angles(self, actor, action, sub_action=0):
+        """
+        :param actor:
+        :param action:
+        :param sub_action:
+        :return:
+        """
+        cdf_file = self.get_cdf_file('D3_Angles',
+                                     actor, action, sub_action)
+        cdf = pycdf.CDF(cdf_file)
+        angles3d = np.squeeze(cdf['Pose'])
+        return angles3d
+
+    def get_raw_angles(self, actor, action, sub_action=0):
+        """
+        :param actor:
+        :param action:
+        :param sub_action:
+        :return:
+        """
+        cdf_file = self.get_cdf_file('RawAngles',
+                                     actor, action, sub_action)
+        cdf = pycdf.CDF(cdf_file)
+        angles3d = np.squeeze(cdf['Pose'])
+        return angles3d
 
 
 
