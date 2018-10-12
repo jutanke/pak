@@ -31,6 +31,13 @@ class Human36m:
             'WalkTogether'
         ]
 
+        # define what joints connect as limbs
+        self.I = np.array([1, 2, 3, 1, 7, 8, 1, 13, 14, 15, 14, 18, 19, 14, 26, 27]) - 1
+        self.J = np.array([2, 3, 4, 7, 8, 9, 13, 14, 15, 16, 18, 19, 20, 26, 27, 28]) - 1
+
+        # define what joints are left- and which ones are right
+        self.LR = np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1], dtype=bool)
+
     def get_cdf_file(self, type, actor, action, sub_action):
         """ helper function to fuse together the string to
             find the cdf file
@@ -111,5 +118,53 @@ class Human36m:
         angles3d = np.squeeze(cdf['Pose'])
         return angles3d
 
+    def plot_human3d(self, ax, human3d,
+                     plot_only_limbs=True, plot_jid=True,
+                     lcolor="#3498db", rcolor="#e74c3c", alpha=0.5):
+        """ plots a human onto a subplot
+        :param ax: subplot
+        :param human3d: [32 x 3]
+        :param plot_only_limbs plot only joints that are on a limb
+        :param plot_jid if True plots the jid next to the 3d location
+        :param lcolor:
+        :param rcolor:
+        :param alpha:
+        :return:
+        """
+        assert len(human3d.shape) == 2
+        n_joints, c = human3d.shape
+        assert n_joints == 32
+        assert c == 3
+        I = self.I
+        J = self.J
+        LR = self.LR
+
+        plots = []
+        valid_3d_ids = set(I).union(set(J))
+
+        vals = np.zeros((32, 3))
+        for i in np.arange(len(I)):
+            x = np.array([vals[I[i], 0], vals[J[i], 0]])
+            y = np.array([vals[I[i], 1], vals[J[i], 1]])
+            z = np.array([vals[I[i], 2], vals[J[i], 2]])
+            plots.append(ax.plot(x, y, z, lw=2, c=lcolor if LR[i] else rcolor, alpha=alpha))
+
+        vals = human3d
+        for i in np.arange(len(I)):
+            x = np.array([vals[I[i], 0], vals[J[i], 0]])
+            y = np.array([vals[I[i], 1], vals[J[i], 1]])
+            z = np.array([vals[I[i], 2], vals[J[i], 2]])
+            plots[i][0].set_xdata(x)
+            plots[i][0].set_ydata(y)
+            plots[i][0].set_3d_properties(z)
+            plots[i][0].set_color(lcolor if LR[i] else rcolor)
+
+        for jid, (x, y, z) in enumerate(human3d):
+            if plot_only_limbs and jid not in valid_3d_ids:
+                continue
+            c = 'green' if jid in valid_3d_ids else 'red'
+            ax.scatter(x, y, z, color=c, alpha=alpha)
+            if plot_jid:
+                ax.text(x, y, z, str(jid))
 
 
