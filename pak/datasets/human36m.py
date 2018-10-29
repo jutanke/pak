@@ -62,8 +62,9 @@ class Human36m:
         videos = sorted(
             [f for f in listdir(cdf_dir) if f.startswith(action)])
 
-        if action == 'Walking':
-            # separate Walking from WalkingDog
+        if action == 'Walking' or action == 'Sitting':
+            # separate Walking from WalkingDog OR
+            # separate Sitting from SittingDown
             assert len(videos) == 4
             videos = videos[0:2]
 
