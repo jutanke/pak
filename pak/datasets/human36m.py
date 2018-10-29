@@ -118,7 +118,8 @@ class Human36m:
         angles3d = np.squeeze(cdf['Pose'])
         return angles3d
 
-    def plot_human3d(self, ax, human3d,
+    @staticmethod
+    def plot_human3d(ax, human3d,
                      plot_only_limbs=True, plot_jid=True,
                      lcolor="#3498db", rcolor="#e74c3c", alpha=0.5):
         """ plots a human onto a subplot
@@ -135,9 +136,11 @@ class Human36m:
         n_joints, c = human3d.shape
         assert n_joints == 32
         assert c == 3
-        I = self.I
-        J = self.J
-        LR = self.LR
+        I = np.array([1, 2, 3, 1, 7, 8, 1, 13, 14, 15, 14, 18, 19, 14, 26, 27]) - 1
+        J = np.array([2, 3, 4, 7, 8, 9, 13, 14, 15, 16, 18, 19, 20, 26, 27, 28]) - 1
+
+        # define what joints are left- and which ones are right
+        LR = np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1], dtype=bool)
 
         plots = []
         valid_3d_ids = set(I).union(set(J))
