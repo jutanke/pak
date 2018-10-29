@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name="pak",
-    version="0.1.2",
+    version="0.1.3",
     packages=[  "pak",
                 "pak/util",
                 "pak/datasets",
