@@ -2,6 +2,8 @@ import numpy as np
 from os.path import join, isdir, isfile
 from os import listdir
 from spacepy import pycdf
+import cv2
+import h5py
 
 
 class Human36m:
@@ -12,7 +14,7 @@ class Human36m:
         """
         assert isdir(root), 'cannot find ' + root + ': download human3.6m'
         self.root = root
-        self.actors = ["S1", 'S5', 'S6', 'S7', 'S8', 'S9']
+        self.actors = ["S1", 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
         self.actions = [
             'Directions',
             'Discussion',
@@ -37,6 +39,127 @@ class Human36m:
 
         # define what joints are left- and which ones are right
         self.LR = np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1], dtype=bool)
+
+        # load cameras
+        camera_file = join(root, 'cameras.h5')
+        assert isfile(camera_file)
+        cam_file = h5py.File(camera_file, 'r')
+
+        self.Calib = []
+
+        for sub in [1, 5, 6, 7, 8, 9, 11]:
+            actors = cam_file['subject' + str(sub)]
+
+            Calib_per_actor = []
+            self.Calib.append(Calib_per_actor)
+            for cid in [1, 2, 3, 4]:
+                camera = {}
+                cam = actors['camera' + str(cid)]
+
+                name = ''
+                for c in cam['Name'][:]:
+                    name += chr(c)
+                camera['name'] = name
+
+                camera['R'] = cam['R'][:]
+                camera['t'] = cam['T'][:]
+                camera['c'] = cam['c'][:]
+                camera['f'] = cam['f'][:]
+                camera['k'] = cam['k'][:]
+                camera['p'] = cam['p'][:]
+                Calib_per_actor.append(camera)
+
+    def load_videos(self, actor, action, sub_action):
+        """ loads video, and memmappes them if not already done
+        :param actor:
+        :param action:
+        :return:
+        """
+        assert actor in self.actors
+        assert action in self.actions
+        assert sub_action == 0 or sub_action == 1
+        video_dir = join(join(self.root, actor), 'Videos')
+        fmap = join(video_dir,
+                    'mmap_' + actor + '_' + action + '_' + str(sub_action) + '.npy')
+
+        is_memmaped = isfile(fmap)
+
+        # -- find name --
+        # this dataset is so damn messy omg...
+        fixed_action = ''
+
+        has_action_with1 = False
+        V = [f for f in listdir(video_dir) if f.startswith(action + ' 1')]
+        if len(V) == 4:
+            has_action_with1 = True
+        else:
+            assert len(V) == 0
+
+        has_action_with2 = False
+        V = [f for f in listdir(video_dir) if f.startswith(action + ' 2')]
+        if len(V) == 4:
+            has_action_with2 = True
+        else:
+            assert len(V) == 0
+
+        if has_action_with1 and has_action_with2:
+            fixed_action = action + ' 1' if sub_action == 0 else action + ' 2'
+        elif has_action_with1:
+            fixed_action = action + '.' if sub_action == 0 else action + ' 1'
+
+        # -- end find name --
+        videos = sorted(
+            [f for f in listdir(video_dir) if f.startswith(fixed_action)])
+
+        if (actor == 'S1' and action == 'Walking') or \
+                action == 'Sitting':
+            videos = videos[0:4]
+
+        assert len(videos) == 4
+
+        X = None
+        shape = None
+        H = None
+        W = None
+
+        for vid, video in enumerate(videos):
+            video = join(video_dir, video)
+            print('\tload video ', video)
+            Im = []
+            cap = cv2.VideoCapture(video)
+            while True:
+                ret, im = cap.read()
+                if not ret:
+                    break
+                im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+                Im.append(im)
+
+            if X is None:
+                if H is None and W is None:
+                    H, W, c = Im[0].shape
+                    assert c == 3
+                shape = (4, len(Im), H, W, 3)
+                if not is_memmaped:
+                    X = np.memmap(fmap, dtype='uint8', mode='w+',
+                                  shape=shape)
+                if is_memmaped:
+                    # we just needed the shape
+                    break
+
+            for i, im in enumerate(Im):
+                if i >= shape[1]:  # just skip "extra" frames
+                    break
+                h, w, c = im.shape
+                X[vid, i, 0:min(h, H), 0:min(w, W), :] =\
+                    im[0:min(h, H), 0:min(w, W), :]
+
+        assert shape is not None
+
+        if not is_memmaped:
+            del X  # flush
+
+        X = np.memmap(fmap, dtype='uint8', mode='r', shape=shape)
+        return X
 
     def get_cdf_file(self, type, actor, action, sub_action):
         """ helper function to fuse together the string to
