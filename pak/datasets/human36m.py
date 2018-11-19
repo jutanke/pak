@@ -181,7 +181,10 @@ class Human36m:
         root = self.root
         cdf_dir = join(join(root, actor), 'MyPoseFeatures')
         cdf_dir = join(cdf_dir, type)
-
+        
+        if actor != 'S1' and action == 'WalkingDog':
+            action = 'WalkDog'
+        
         videos = sorted(
             [f for f in listdir(cdf_dir) if f.startswith(action)])
 
