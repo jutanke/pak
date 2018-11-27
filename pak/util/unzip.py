@@ -1,5 +1,6 @@
 import zipfile
 import tarfile
+import lzma
 import subprocess
 from pak import utils
 import time
