@@ -158,23 +158,32 @@ class CAD_120:
                 assert channels == 61  # (15 * 4 + 1)
 
                 # transform points
-                transform_fname = join(action_loc,
-                                       seq_name + '_globalTransform.txt')
-                assert isfile(transform_fname)
-                P = np.loadtxt(transform_fname, delimiter=',')
+                #transform_fname = join(action_loc,
+                #                       seq_name + '_globalTransform.txt')
+                #assert isfile(transform_fname)
+                #P = np.loadtxt(transform_fname, delimiter=',')
 
                 pts3d = pts3d_w_conf[:, items3d]\
                     .reshape((n_frames, 15, 3))
-                ones = np.ones((n_frames, 15, 1))
-                pts3d_h = np.concatenate([pts3d, ones], axis=2)
+                # ones = np.ones((n_frames, 15, 1))
+                # pts3d_h = np.concatenate([pts3d, ones], axis=2)
 
-                pts3d_h_trans = np.einsum('ijk,kl', pts3d_h, P)
-                pts3d_h_trans = pts3d_h_trans / np.expand_dims(
-                    pts3d_h_trans[:, :, 3], axis=2
-                )
+                # pts3d_h_trans = np.einsum('ijk,kl', pts3d_h, P)
+                # pts3d_h_trans = pts3d_h_trans / np.expand_dims(
+                #     pts3d_h_trans[:, :, 3], axis=2
+                # )
+                #
+                # pts3d_w_conf[:, items3d] = pts3d_h_trans[:, :, 0:3]\
+                #     .reshape((n_frames, 45))
 
-                pts3d_w_conf[:, items3d] = pts3d_h_trans[:, :, 0:3]\
-                    .reshape((n_frames, 45))
+                P = np.array([
+                    [1, 0, 0],
+                    [0, 0, -1],
+                    [0, 1, 0]
+                ], np.float64)
+
+                pts3d_trans = np.einsum('ijk,lk', pts3d, P)
+                pts3d_w_conf[:, items3d] = pts3d_trans.reshape((n_frames, 45))
 
                 assert seq_name not in sequences
                 sequences[seq_name] = {

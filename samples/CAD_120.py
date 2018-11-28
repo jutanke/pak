@@ -29,8 +29,10 @@ ax = fig.add_subplot(111, projection='3d')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Z')
+ax.set_xlim([-800, 800])
+ax.set_ylim([-2100, -500])
+ax.set_zlim([-800, 800])
 
 data.plot(ax, person, plot_jids=True)
 
-plt.axis('equal')
 plt.show()
