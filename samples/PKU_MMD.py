@@ -14,19 +14,17 @@ from pak.datasets.PKU_MMD import PKU_MMD, plot_skeleton
 
 data = PKU_MMD(root)
 
-#data.train_videos
+skel1, _, labels1 = data.get_3d('0002-L')
+skel2, _, labels2 = data.get_3d('0002-R')
 
-skel1, skel2 = data.get_3d('0002-L')
-
-s1 = skel1[2000]
-s2 = skel2[0]
-
-fig = plt.figure(figsize=(12, 12))
+fig = plt.figure(figsize=(16, 8))
 R = 1
-ax = fig.add_subplot(111, projection='3d')
+ax1 = fig.add_subplot(121, projection='3d')
+ax2 = fig.add_subplot(122, projection='3d')
 
-for t in range(2000):
-    s1 = skel1[t]
+
+def plot(ax, skel):
+    s1 = skel[t]
     ax.clear()
     ax.set_xlim(-R, R)
     ax.set_xlabel('x')
@@ -35,6 +33,17 @@ for t in range(2000):
     ax.set_zlim(-R, R)
     ax.set_zlabel('z')
     plot_skeleton(ax, s1)
+
+
+for t in range(2000):
+    label = labels1[t]
+    plot(ax1, skel1)
+    plot(ax2, skel2)
+
+    txt = 'None' if label == 0 else data.action_id_to_action_name[label]
+    ax1.set_title(txt)
+    ax2.set_title(txt)
+
     plt.pause(1/33.33)
 
 plt.show()

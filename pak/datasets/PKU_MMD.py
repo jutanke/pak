@@ -117,7 +117,6 @@ class PKU_MMD:
         skel2 = flip_axis_so_that_z_is_height(skel2)
 
         # load labels
-
         y = np.zeros((n_frames, ), np.int32)
         fname = join(self.label_root, video + '.txt')
         assert isfile(fname)
