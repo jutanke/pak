@@ -14,8 +14,8 @@ from pak.datasets.PKU_MMD import PKU_MMD, plot_skeleton
 
 data = PKU_MMD(root)
 
-skel1, _, labels1 = data.get_3d('0002-L')
-skel2, _, labels2 = data.get_3d('0002-R')
+skel1, _, labels1 = data.get_3d('0009-L')
+skel2, _, labels2 = data.get_3d('0009-M')
 
 fig = plt.figure(figsize=(16, 8))
 R = 1
