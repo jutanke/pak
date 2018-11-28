@@ -1,5 +1,6 @@
 import numpy as np
 import numba as nb
+import pandas as pd
 from os.path import join, isdir, isfile
 
 
@@ -56,6 +57,8 @@ class PKU_MMD:
         data_root = join(data_root, 'PKU_Skeleton_Renew')
         self.data_root = data_root
         label_root = join(pku_root, 'Label')
+        label_root = join(label_root, 'Train_Label_PKU_final')
+        self.label_root = label_root
         split_root = join(pku_root, 'Split')
         assert isdir(data_root)
         assert isdir(label_root)
@@ -78,14 +81,29 @@ class PKU_MMD:
         self.validation_videos = [
             f for f in validation_videos if len(f) == 6]
 
+        # get the names
+        fname = join(split_root, 'Actions.xlsx')
+        assert isfile(fname)
+        xlsx = pd.read_excel(fname)
+        action_names = list(xlsx['Action'])
+        action_ids = list(xlsx['Label'])
+
+        # ids -> action
+        self.action_id_to_action_name = {}
+        # action -> id
+        self.action_name_to_action_id = {}
+
+        for aid, name in zip(action_ids, action_names):
+            self.action_id_to_action_name[aid] = name
+            self.action_name_to_action_id[name] = aid
+
     def get_3d(self, video):
         """
         :param video: {string} e.g. '0002-L'
         :return:
         """
         assert len(video) == 6
-        data_root = self.data_root
-        fname = join(data_root, video + '.txt')
+        fname = join(self.data_root, video + '.txt')
         assert isfile(fname)
 
         skeletons = np.loadtxt(fname)
@@ -98,7 +116,16 @@ class PKU_MMD:
         skel1 = flip_axis_so_that_z_is_height(skel1)
         skel2 = flip_axis_so_that_z_is_height(skel2)
 
-        return skel1, skel2
+        # load labels
+
+        y = np.zeros((n_frames, ), np.int32)
+        fname = join(self.label_root, video + '.txt')
+        assert isfile(fname)
+        labels = np.loadtxt(fname, delimiter=',', dtype=np.int32)
+        for activity, start_frame, end_frame, _ in labels:
+            y[start_frame:end_frame] = activity
+
+        return skel1, skel2, y
 
 
 @nb.jit(nb.float64[:, :, :](
