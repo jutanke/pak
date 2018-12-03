@@ -1,7 +1,9 @@
+import cv2
 import numpy as np
 import numba as nb
 import pandas as pd
 from os.path import join, isdir, isfile
+from os import makedirs
 
 
 def plot_skeleton(ax, skel,
@@ -54,6 +56,7 @@ class PKU_MMD:
         pku_root = join(root, 'PKUMMD')
         assert isdir(pku_root)
         data_root = join(pku_root, 'Data')
+        self.video_root = join(data_root, 'RGB_VIDEO')
         data_root = join(data_root, 'PKU_Skeleton_Renew')
         self.data_root = data_root
         label_root = join(pku_root, 'Label')
@@ -96,6 +99,35 @@ class PKU_MMD:
         for aid, name in zip(action_ids, action_names):
             self.action_id_to_action_name[aid] = name
             self.action_name_to_action_id[name] = aid
+
+    def get_frame(self, video, frame):
+        """
+        :param video: {string} e.g. '0002-L'
+        :param frame: {int}
+        :return:
+        """
+        assert len(video) == 6
+        img_dir = join(self.video_root, video)
+        if not isdir(img_dir):
+            print('\tunpacking into ' + img_dir)
+            # create images for all frames
+            fname = join(self.video_root, video + '.avi')
+            assert isfile(fname)
+            makedirs(img_dir)
+            cap = cv2.VideoCapture(fname)
+            ret = True
+            frame_nbr = 1
+            while ret:
+                # Capture frame-by-frame
+                ret, im = cap.read()
+                img_name = join(img_dir, "frame%05d.png" % frame_nbr)
+                cv2.imwrite(img_name, im)
+                frame_nbr += 1
+
+        img_name = join(img_dir, "frame%05d.png" % frame)
+        im = cv2.imread(img_name)
+        im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
+        return im
 
     def get_3d(self, video):
         """
