@@ -3,9 +3,9 @@ from distutils.core import setup
 setup(
     name="pak",
     version="0.1.8",
-    packages=[  "pak",
-                "pak/util",
-                "pak/datasets",
-                "pak/evaluation",
-                "pak/post_processing"],
+    packages=["pak",
+              "pak/util",
+              "pak/datasets",
+              "pak/evaluation",
+              "pak/post_processing"],
 )
