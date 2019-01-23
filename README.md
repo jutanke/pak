@@ -47,6 +47,11 @@ Install spacepy
 pip install git+https://github.com/spacepy/spacepy.git
 ```
 
+### transforms3d
+Some datasets require transforms3d:
+```bash
+pip install transforms3d
+```
 
 ## [Evaluation](https://github.com/justayak/pak/tree/master/pak/evaluation)
 
@@ -288,6 +293,12 @@ mpm = UMPM(root, user, pwd)
 X, Y, Calib = mpm.get_data('p1_grab_3')
 ```
 ![umpm](https://user-images.githubusercontent.com/831215/37305298-46b724c6-2634-11e8-81bd-68fe2ba4aada.png)
+
+# External Code
+To parse some of the datasets, external code written by other people is used.
+
+## CMU MoCap dataset:
+Parsing .asf and .amc written by Yuxiao Zhou (https://github.com/CalciferZh/AMCParser)
 
 # References
 
