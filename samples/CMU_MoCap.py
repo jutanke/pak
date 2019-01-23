@@ -22,7 +22,7 @@ fig = plt.figure(figsize=(10, 10))
 ax = fig.add_subplot(111, projection='3d')
 
 
-for t in range(0, 430, 10):
+for t in range(0, len(joints), 10):
     ax.clear()
     ax.set_xlim([minv, maxv])
     ax.set_ylim([minv, maxv])

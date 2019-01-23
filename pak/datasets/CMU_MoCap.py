@@ -61,7 +61,11 @@ def plot(ax, human, plot_jid=False, do_scatter=True,
 
 class CMU_MoCap:
 
-    def __init__(self, data_root):
+    def __init__(self, data_root, z_is_up=True):
+        """
+        :param data_root: root location for data
+        :param z_is_up: if True ensure that z points upwards
+        """
         assert isdir(data_root)
 
         root = join(data_root, 'cmu_mocap')
@@ -87,6 +91,7 @@ class CMU_MoCap:
 
         self.subjects = sorted(listdir(subject_folder))
         self.subject_folder = subject_folder
+        self.z_is_up = z_is_up
 
     def get(self, subject, action):
         subject_loc = join(self.subject_folder, subject)
@@ -108,6 +113,14 @@ class CMU_MoCap:
             joints['root'].set_motion(motion)
             for jid, j in enumerate(joints.values()):
                 points3d[frame, jid] = np.squeeze(j.coordinate)
+
+        if self.z_is_up:
+            R = np.array([
+                [1, 0, 0],
+                [0, 0, 1],
+                [0, -1, 0]
+            ])
+            points3d = points3d @ R
 
         return points3d
 
