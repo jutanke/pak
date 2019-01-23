@@ -61,10 +61,12 @@ def plot(ax, human, plot_jid=False, do_scatter=True,
 
 class CMU_MoCap:
 
-    def __init__(self, data_root, z_is_up=True):
+    def __init__(self, data_root, z_is_up=True, store_binary=False):
         """
         :param data_root: root location for data
         :param z_is_up: if True ensure that z points upwards
+        :param store_binary: if True store the extracted video sequence as
+            numpy binary for faster access
         """
         assert isdir(data_root)
 
@@ -92,10 +94,24 @@ class CMU_MoCap:
         self.subjects = sorted(listdir(subject_folder))
         self.subject_folder = subject_folder
         self.z_is_up = z_is_up
+        self.store_binary = store_binary
 
     def get(self, subject, action):
+        """
+        :param subject:
+        :param action:
+        :return:
+        """
+        store_binary = self.store_binary
         subject_loc = join(self.subject_folder, subject)
         assert isdir(subject_loc), subject_loc
+
+        if store_binary:
+            npy_file = join(subject_loc, subject + '_' + action + '.npy')
+            if isfile(npy_file):
+                points3d = np.load(npy_file)
+                return points3d
+
         asf_file = join(subject_loc, subject + '.asf')
         amc_file = join(subject_loc, subject + '_' + action + '.amc')
         assert isfile(asf_file), asf_file
@@ -121,6 +137,9 @@ class CMU_MoCap:
                 [0, -1, 0]
             ])
             points3d = points3d @ R
+
+        if store_binary:
+            np.save(npy_file, points3d)  # file must not exist
 
         return points3d
 
