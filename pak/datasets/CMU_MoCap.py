@@ -1,7 +1,6 @@
 from os.path import isfile, isdir, join
 from os import listdir, makedirs
 from pak.util import download, unzip
-import c3d
 import numpy as np
 import matplotlib.pyplot as plt
 from transforms3d.euler import euler2mat
@@ -95,6 +94,16 @@ class CMU_MoCap:
         self.subject_folder = subject_folder
         self.z_is_up = z_is_up
         self.store_binary = store_binary
+
+    def get_actions(self, subject):
+        """ returns all action ids for a subject
+        :param subject:
+        :return:
+        """
+        subject_loc = join(self.subject_folder, subject)
+        a = len(subject) + 1
+        amc_files = [f[a:a+2] for f in listdir(subject_loc) if f.endswith('.amc')]
+        return sorted(amc_files)
 
     def get(self, subject, action):
         """

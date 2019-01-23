@@ -12,8 +12,7 @@ data = CMU_MoCap(Settings['data_root'])
 
 joints = data.get('01', '01')
 print("joints:", joints.shape)
-
-FRAME = 0
+print('actions:', data.get_actions('01'))
 
 minv = 1.1 * np.min(joints)
 maxv = 1.1 * np.max(joints)
