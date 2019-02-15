@@ -13,23 +13,39 @@ def plot(ax, human, plot_jid=False, do_scatter=True,
     n_joints, n_channels = human.shape
     assert n_channels == 3
 
-    connect = [
-        (11, 12), (12, 13), (13, 14), (14, 15), (15, 16),
-        (1, 2), (2, 3), (3, 4), (4, 5),
-        (6, 7), (7, 8), (8, 9), (9, 10),
-        (1, 6), (11, 0), (0, 1), (0, 6),
-        (17, 18), (18, 19), (19, 20), (20, 21), (21, 22), (22, 23),
-        (17, 14), (14, 24),
-        (24, 25), (25, 26), (26, 27), (27, 28), (28, 29), (29, 30)
-    ]
+    if n_joints == 31:
+        connect = [
+            (11, 12), (12, 13), (13, 14), (14, 15), (15, 16),
+            (1, 2), (2, 3), (3, 4), (4, 5),
+            (6, 7), (7, 8), (8, 9), (9, 10),
+            (1, 6), (11, 0), (0, 1), (0, 6),
+            (17, 18), (18, 19), (19, 20), (20, 21), (21, 22), (22, 23),
+            (17, 14), (14, 24),
+            (24, 25), (25, 26), (26, 27), (27, 28), (28, 29), (29, 30)
+        ]
 
-    LMR = [1, 0, 0, 0, 0,
-           0, 2, 2, 2, 2,
-           2, 1, 1, 1, 1,
-           1, 1, 0, 0, 0,
-           0, 0, 0, 0, 2,
-           2, 2, 2, 2, 2,
-           2, 2, 1, 1, 1]
+        LMR = [1, 0, 0, 0, 0,
+               0, 2, 2, 2, 2,
+               2, 1, 1, 1, 1,
+               1, 1, 0, 0, 0,
+               0, 0, 0, 0, 2,
+               2, 2, 2, 2, 2,
+               2, 2, 1, 1, 1]
+    elif n_joints == 25:
+        connect = [
+            (0, 24), (24, 22),
+            (15, 21), (21, 19), (19, 17), (17, 12),
+            (11, 4), (11, 9), (9, 6), (6, 1),
+            (5, 1), (12, 16), (1, 24), (12, 24), (5, 16),
+            (22, 23), (7, 23), (23, 18), (18, 16), (18, 5),
+            (5, 2), (2, 10), (10, 3),
+            (16, 13), (13, 20), (20, 14)
+
+        ]
+        LMR = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+               2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 1, 1, 1]
+    else:
+        raise NotImplementedError("#joints " + str(n_joints))
 
     for a, b in connect:
         is_middle = (LMR[a] == 1 and LMR[b] == 1) or \
@@ -105,6 +121,22 @@ class CMU_MoCap:
         amc_files = [f[a:a+2] for f in listdir(subject_loc) if f.endswith('.amc')]
         return sorted(amc_files)
 
+    def get_asf_amc(self, subject, action):
+        """ gets the .asf / .amc files
+        :param subject:
+        :param action:
+        :return:
+        """
+        subject_loc = join(self.subject_folder, subject)
+        assert isdir(subject_loc), subject_loc
+        asf_file = join(subject_loc, subject + '.asf')
+        amc_file = join(subject_loc, subject + '_' + action + '.amc')
+        assert isfile(asf_file), asf_file
+        assert isfile(amc_file), amc_file
+        joints = parse_asf(asf_file)
+        motions = parse_amc(amc_file)
+        return joints, motions
+
     def get(self, subject, action):
         """
         :param subject:
@@ -121,13 +153,7 @@ class CMU_MoCap:
                 points3d = np.load(npy_file)
                 return points3d
 
-        asf_file = join(subject_loc, subject + '.asf')
-        amc_file = join(subject_loc, subject + '_' + action + '.amc')
-        assert isfile(asf_file), asf_file
-        assert isfile(amc_file), amc_file
-
-        joints = parse_asf(asf_file)
-        motions = parse_amc(amc_file)
+        joints, motions = self.get_asf_amc(subject, action)
 
         n_joints = 31
         n_frames = len(motions)
@@ -151,6 +177,296 @@ class CMU_MoCap:
             np.save(npy_file, points3d)  # file must not exist
 
         return points3d
+
+
+# ~~~~~~~~~~~~~~~~~ GLOBAL VARS ~~~~~~~~~~~~~~~~~
+JOINTS_TO_DOF = {'root': [],
+                 'lhipjoint': [],
+                 'lfemur': ['rx', 'ry', 'rz'],
+                 'ltibia': ['rx'],
+                 'lfoot': ['rx', 'rz'],
+                 'rhipjoint': [],
+                 'rfemur': ['rx', 'ry', 'rz'],
+                 'rtibia': ['rx'],
+                 'rfoot': ['rx', 'rz'],
+                 'lowerback': ['rx', 'ry', 'rz'],
+                 'upperback': ['rx', 'ry', 'rz'],
+                 'thorax': ['rx', 'ry', 'rz'],
+                 'lowerneck': ['rx', 'ry', 'rz'],
+                 'upperneck': ['rx', 'ry', 'rz'],
+                 'head': ['rx', 'ry', 'rz'],
+                 'lclavicle': ['ry', 'rz'],
+                 'lhumerus': ['rx', 'ry', 'rz'],
+                 'lradius': ['rx'],
+                 'lwrist': ['ry'],
+                 'lhand': ['rx', 'rz'],
+                 'rclavicle': ['ry', 'rz'],
+                 'rhumerus': ['rx', 'ry', 'rz'],
+                 'rradius': ['rx'],
+                 'rwrist': ['ry'],
+                 'rhand': ['rx', 'rz']}
+
+
+PARENTS = {'root': None,
+           'lhipjoint': 'root',
+           'lfemur': 'lhipjoint',
+           'ltibia': 'lfemur',
+           'lfoot': 'ltibia',
+           'rhipjoint': 'root',
+           'rfemur': 'rhipjoint',
+           'rtibia': 'rfemur',
+           'rfoot': 'rtibia',
+           'lowerback': 'root',
+           'upperback': 'lowerback',
+           'thorax': 'upperback',
+           'lowerneck': 'thorax',
+           'upperneck': 'lowerneck',
+           'head': 'upperneck',
+           'lclavicle': 'thorax',
+           'lhumerus': 'lclavicle',
+           'lradius': 'lhumerus',
+           'lwrist': 'lradius',
+           'lhand': 'lwrist',
+           'rclavicle': 'thorax',
+           'rhumerus': 'rclavicle',
+           'rradius': 'rhumerus',
+           'rwrist': 'rradius',
+           'rhand': 'rwrist'}
+
+JOINT_AXIS_TO_INDEX = {('lfemur', 'rx'): 0,
+                       ('lfemur', 'ry'): 1,
+                       ('lfemur', 'rz'): 2,
+                       ('ltibia', 'rx'): 3,
+                       ('lfoot', 'rx'): 4,
+                       ('lfoot', 'rz'): 5,
+                       ('rfemur', 'rx'): 6,
+                       ('rfemur', 'ry'): 7,
+                       ('rfemur', 'rz'): 8,
+                       ('rtibia', 'rx'): 9,
+                       ('rfoot', 'rx'): 10,
+                       ('rfoot', 'rz'): 11,
+                       ('lowerback', 'rx'): 12,
+                       ('lowerback', 'ry'): 13,
+                       ('lowerback', 'rz'): 14,
+                       ('upperback', 'rx'): 15,
+                       ('upperback', 'ry'): 16,
+                       ('upperback', 'rz'): 17,
+                       ('thorax', 'rx'): 18,
+                       ('thorax', 'ry'): 19,
+                       ('thorax', 'rz'): 20,
+                       ('lowerneck', 'rx'): 21,
+                       ('lowerneck', 'ry'): 22,
+                       ('lowerneck', 'rz'): 23,
+                       ('upperneck', 'rx'): 24,
+                       ('upperneck', 'ry'): 25,
+                       ('upperneck', 'rz'): 26,
+                       ('head', 'rx'): 27,
+                       ('head', 'ry'): 28,
+                       ('head', 'rz'): 29,
+                       ('lclavicle', 'ry'): 30,
+                       ('lclavicle', 'rz'): 31,
+                       ('lhumerus', 'rx'): 32,
+                       ('lhumerus', 'ry'): 33,
+                         ('lhumerus', 'rz'): 34,
+                       ('lradius', 'rx'): 35,
+                       ('lwrist', 'ry'): 36,
+                       ('lhand', 'rx'): 37,
+                       ('lhand', 'rz'): 38,
+                       ('rclavicle', 'ry'): 39,
+                       ('rclavicle', 'rz'): 40,
+                       ('rhumerus', 'rx'): 41,
+                       ('rhumerus', 'ry'): 42,
+                       ('rhumerus', 'rz'): 43,
+                       ('rradius', 'rx'): 44,
+                       ('rwrist', 'ry'): 45,
+                       ('rhand', 'rx'): 46,
+                       ('rhand', 'rz'): 47,
+                       ('root', 'rx'): 48,
+                       ('root', 'ry'): 49,
+                       ('root', 'rz'): 50,
+                       ('root', 'x'): 51,
+                       ('root', 'y'): 52,
+                       ('root', 'z'): 53}
+
+INDEX_TO_JOINT_AXIS = {0: ('lfemur', 'rx'),
+                       1: ('lfemur', 'ry'),
+                       2: ('lfemur', 'rz'),
+                       3: ('ltibia', 'rx'),
+                       4: ('lfoot', 'rx'),
+                       5: ('lfoot', 'rz'),
+                       6: ('rfemur', 'rx'),
+                       7: ('rfemur', 'ry'),
+                       8: ('rfemur', 'rz'),
+                       9: ('rtibia', 'rx'),
+                       10: ('rfoot', 'rx'),
+                       11: ('rfoot', 'rz'),
+                       12: ('lowerback', 'rx'),
+                       13: ('lowerback', 'ry'),
+                       14: ('lowerback', 'rz'),
+                       15: ('upperback', 'rx'),
+                       16: ('upperback', 'ry'),
+                       17: ('upperback', 'rz'),
+                       18: ('thorax', 'rx'),
+                       19: ('thorax', 'ry'),
+                       20: ('thorax', 'rz'),
+                       21: ('lowerneck', 'rx'),
+                       22: ('lowerneck', 'ry'),
+                       23: ('lowerneck', 'rz'),
+                       24: ('upperneck', 'rx'),
+                       25: ('upperneck', 'ry'),
+                       26: ('upperneck', 'rz'),
+                       27: ('head', 'rx'),
+                       28: ('head', 'ry'),
+                       29: ('head', 'rz'),
+                       30: ('lclavicle', 'ry'),
+                       31: ('lclavicle', 'rz'),
+                       32: ('lhumerus', 'rx'),
+                       33: ('lhumerus', 'ry'),
+                       34: ('lhumerus', 'rz'),
+                       35: ('lradius', 'rx'),
+                       36: ('lwrist', 'ry'),
+                       37: ('lhand', 'rx'),
+                       38: ('lhand', 'rz'),
+                       39: ('rclavicle', 'ry'),
+                       40: ('rclavicle', 'rz'),
+                       41: ('rhumerus', 'rx'),
+                       42: ('rhumerus', 'ry'),
+                       43: ('rhumerus', 'rz'),
+                       44: ('rradius', 'rx'),
+                       45: ('rwrist', 'ry'),
+                       46: ('rhand', 'rx'),
+                       47: ('rhand', 'rz'),
+                       48: ('root', 'rx'),
+                       49: ('root', 'ry'),
+                       50: ('root', 'rz'),
+                       51: ('root', 'x'),
+                       52: ('root', 'y'),
+                       53: ('root', 'z')}
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+def remove_joints(joints, motions, rm_list):
+    for rm in rm_list:
+        for side in ['l', 'r']:
+            key = side + rm
+            del joints[key]
+
+            for jid, joint in joints.items():
+                new_children = []
+                old_children = joint.children
+                for child in old_children:
+                    if child.name != key:
+                        new_children.append(child)
+                joint.children = new_children
+
+            for t, motion in enumerate(motions):
+                del motion[key]
+    return joints, motions
+
+
+def to_rotation_vector_representation(joints, motions):
+    rm_list = ['fingers', 'toes', 'thumb']
+    joints, motions = remove_joints(joints, motions, rm_list)
+    n_frames = len(motions)
+    dim = 54
+    result = np.empty((n_frames, dim))
+
+    for t in range(n_frames):
+        result[t] = motion2vector(motions[t])
+
+    return result, joints
+
+
+def from_rotation_vector_representation(vectors):
+    result = []
+    n = len(vectors)
+    for t in range(n):
+        result.append(vector2motion(vectors[t]))
+    return result
+
+
+def motion2vector(motion):
+    result = np.empty((54,), np.float32)
+    for key in motion.keys():
+        if key not in JOINTS_TO_DOF:
+            continue
+        for deg, ax in zip(motion[key], JOINTS_TO_DOF[key]):
+            idx = JOINT_AXIS_TO_INDEX[key, ax]
+            result[idx] = np.deg2rad(deg)
+
+            # handle root
+    for ax, v in zip(
+            ['x', 'y', 'z', 'rx', 'ry', 'rz'],
+            motion['root']):
+        if ax.startswith('r'):
+            v = np.deg2rad(v)
+        idx = JOINT_AXIS_TO_INDEX['root', ax]
+        result[idx] = v
+
+    return result
+
+
+def vector2motion(vector):
+    result = {}
+    for key, axs in JOINTS_TO_DOF.items():
+        v = []
+        for ax in axs:
+            idx = JOINT_AXIS_TO_INDEX[key, ax]
+            v.append(np.rad2deg(vector[idx]))
+        if len(v) > 0:
+            result[key] = v
+
+    v = []
+    for ax in ['x', 'y', 'z', 'rx', 'ry', 'rz']:
+        idx = JOINT_AXIS_TO_INDEX['root', ax]
+        value = vector[idx]
+        if ax.startswith('r'):
+            value = np.rad2deg(value)
+        v.append(value)
+    assert len(v) == 6
+    result['root'] = v
+
+    return result
+
+
+def plot_vector(ax, vector, joints, z_point_up=True,
+                plot_jid=False, do_scatter=True,
+                lcolor="#3498db", mcolor='gray', rcolor="#e74c3c",
+                alpha=0.5):
+    """
+    :param ax:
+    :param vector:
+    :param joints:
+    :param plot_jid:
+    :param do_scatter:
+    :param lcolor:
+    :param mcolor:
+    :param rcolor:
+    :param alpha:
+    :return:
+    """
+    motion = vector2motion(vector)
+    joints['root'].set_motion(motion)
+
+    n_joints = len(JOINTS_TO_DOF)
+    points3d = np.empty((n_joints, 3), np.float32)
+    for idx, key in enumerate(sorted(JOINTS_TO_DOF.keys())):
+        joint = joints[key]
+        points3d[idx] = np.squeeze(joint.coordinate)
+
+    if z_point_up:
+        R = np.array([
+            [1, 0, 0],
+            [0, 0, 1],
+            [0, -1, 0]
+        ])
+        points3d = points3d @ R
+
+    plot(ax, points3d, plot_jid=plot_jid, do_scatter=do_scatter,
+         lcolor=lcolor, rcolor=rcolor, mcolor=mcolor, alpha=alpha)
+
+    return points3d
 
 
 # =====================================================================
@@ -183,6 +499,7 @@ class Joint:
     self.C = euler2mat(*axis)
     self.Cinv = np.linalg.inv(self.C)
     self.limits = np.zeros([3, 2])
+    self.dof = dof
     for lm, nm in zip(limits, dof):
       if nm == 'rx':
         self.limits[0] = lm
@@ -199,6 +516,7 @@ class Joint:
     if self.name == 'root':
       self.coordinate = np.reshape(np.array(motion['root'][:3]), [3, 1])
       rotation = np.deg2rad(motion['root'][3:])
+      self.rotation = rotation
       self.matrix = self.C.dot(euler2mat(*rotation)).dot(self.Cinv)
     else:
       idx = 0
@@ -208,6 +526,7 @@ class Joint:
           rotation[axis] = motion[self.name][idx]
           idx += 1
       rotation = np.deg2rad(rotation)
+      self.rotation = rotation
       self.matrix = self.parent.matrix.dot(self.C).dot(euler2mat(*rotation)).dot(self.Cinv)
       self.coordinate = self.parent.coordinate + self.length * self.matrix.dot(self.direction)
     for child in self.children:
@@ -383,3 +702,4 @@ def parse_amc(file_path):
       joint_degree[line[0]] = [float(deg) for deg in line[1:]]
     frames.append(joint_degree)
   return frames
+
