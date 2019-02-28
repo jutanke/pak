@@ -40,34 +40,7 @@ class Human36m:
         # define what joints are left- and which ones are right
         self.LR = np.array([1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1], dtype=bool)
 
-        # load cameras
-        camera_file = join(root, 'cameras.h5')
-        assert isfile(camera_file)
-        cam_file = h5py.File(camera_file, 'r')
-
         self.Calib = []
-
-        for sub in [1, 5, 6, 7, 8, 9, 11]:
-            actors = cam_file['subject' + str(sub)]
-
-            Calib_per_actor = []
-            self.Calib.append(Calib_per_actor)
-            for cid in [1, 2, 3, 4]:
-                camera = {}
-                cam = actors['camera' + str(cid)]
-
-                name = ''
-                for c in cam['Name'][:]:
-                    name += chr(c)
-                camera['name'] = name
-
-                camera['R'] = cam['R'][:]
-                camera['t'] = cam['T'][:]
-                camera['c'] = cam['c'][:]
-                camera['f'] = cam['f'][:]
-                camera['k'] = cam['k'][:]
-                camera['p'] = cam['p'][:]
-                Calib_per_actor.append(camera)
 
     def load_videos(self, actor, action, sub_action):
         """ loads video, and memmappes them if not already done
@@ -78,6 +51,34 @@ class Human36m:
         assert actor in self.actors
         assert action in self.actions
         assert sub_action == 0 or sub_action == 1
+
+        if len(self.Calib) == 0:
+            # load cameras
+            camera_file = join(self.root, 'cameras.h5')
+            assert isfile(camera_file)
+            cam_file = h5py.File(camera_file, 'r')
+            for sub in [1, 5, 6, 7, 8, 9, 11]:
+                actors = cam_file['subject' + str(sub)]
+
+                Calib_per_actor = []
+                self.Calib.append(Calib_per_actor)
+                for cid in [1, 2, 3, 4]:
+                    camera = {}
+                    cam = actors['camera' + str(cid)]
+
+                    name = ''
+                    for c in cam['Name'][:]:
+                        name += chr(c)
+                    camera['name'] = name
+
+                    camera['R'] = cam['R'][:]
+                    camera['t'] = cam['T'][:]
+                    camera['c'] = cam['c'][:]
+                    camera['f'] = cam['f'][:]
+                    camera['k'] = cam['k'][:]
+                    camera['p'] = cam['p'][:]
+                    Calib_per_actor.append(camera)
+
         video_dir = join(join(self.root, actor), 'Videos')
         fmap = join(video_dir,
                     'mmap_' + actor + '_' + action + '_' + str(sub_action) + '.npy')
