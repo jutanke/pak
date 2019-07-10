@@ -15,7 +15,7 @@ class Human36m:
         assert isdir(root), 'cannot find ' + root + ': download human3.6m'
         self.root = root
         self.actors = ["S1", 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
-        self.actions = [
+        self.actions = [a.lower() for a in [
             'Directions',
             'Discussion',
             'Eating',
@@ -31,7 +31,7 @@ class Human36m:
             'Walking',
             'WalkingDog',
             'WalkTogether'
-        ]
+        ]]
 
         # define what joints connect as limbs
         self.I = np.array([1, 2, 3, 1, 7, 8, 1, 13, 14, 15, 14, 18, 19, 14, 26, 27]) - 1
@@ -48,6 +48,7 @@ class Human36m:
         :param action:
         :return:
         """
+        action = action.lower()
         assert actor in self.actors
         assert action in self.actions
         assert sub_action == 0 or sub_action == 1
@@ -171,6 +172,7 @@ class Human36m:
         :param sub_action:
         :return:
         """
+        action = action.lower()
         assert type in {'D3_Positions', 'D3_Angles', 'RawAngles'}
         assert actor in self.actors
         assert action in self.actions
@@ -214,6 +216,7 @@ class Human36m:
         :param sub_action:
         :return:
         """
+        action = action.lower()
         cdf_file = self.get_cdf_file('D3_Positions',
                                      actor, action, sub_action)
         cdf = pycdf.CDF(cdf_file)
@@ -228,6 +231,7 @@ class Human36m:
         :param sub_action:
         :return:
         """
+        action = action.lower()
         cdf_file = self.get_cdf_file('D3_Angles',
                                      actor, action, sub_action)
         cdf = pycdf.CDF(cdf_file)
@@ -241,6 +245,7 @@ class Human36m:
         :param sub_action:
         :return:
         """
+        action = action.lower()
         cdf_file = self.get_cdf_file('RawAngles',
                                      actor, action, sub_action)
         cdf = pycdf.CDF(cdf_file)
