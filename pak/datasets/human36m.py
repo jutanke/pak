@@ -8,10 +8,11 @@ import h5py
 
 class Human36m:
 
-    def __init__(self, root):
+    def __init__(self, root, verbose=False):
         """
 
         """
+        self.verbose = verbose
         assert isdir(root), 'cannot find ' + root + ': download human3.6m'
         self.root = root
         self.actors = ["S1", 'S5', 'S6', 'S7', 'S8', 'S9', 'S11']
@@ -171,6 +172,8 @@ class Human36m:
         :param sub_action:
         :return:
         """
+        if self.verbose:
+            print("[H36M::get_cdf_file]", (actor, action, sub_action))
         assert type in {'D3_Positions', 'D3_Angles', 'RawAngles'}
         assert actor in self.actors
         assert action in self.actions
@@ -186,6 +189,13 @@ class Human36m:
         if actor != 'S1' and action == 'WalkingDog':
             action = 'WalkDog'
         
+        if self.verbose:
+            print("\tcdf_dir=", cdf_dir)
+            all_files = listdir(cdf_dir)
+            print('\tall files:', all_files)
+            print('actor=', actor)
+            print('action=', action)
+            
         videos = sorted(
             [f for f in listdir(cdf_dir) if f.startswith(action)])
 
