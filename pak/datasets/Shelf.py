@@ -41,7 +41,7 @@ class Shelf:
             if verbose:
                 print('\nunzip ' + zip_filename)
                 unzip.unzip(zip_filename, data_root, verbose)
-                
+
         if verbose:
             print('\n')
 
@@ -64,7 +64,7 @@ class Shelf:
         M = loadmat(actorsGTmat)
         Actor3d = M['actor3D'][0]
         persons = []
-        for pid in range(3):
+        for pid in range(4):
             pts = []
             Person = Actor3d[pid]
             n = len(Person)
@@ -98,7 +98,8 @@ class Shelf:
         Y = [
             self.Y[0][frame],
             self.Y[1][frame],
-            self.Y[2][frame]
+            self.Y[2][frame],
+            self.Y[3][frame]
         ]
         for cid in range(5):
             img_dir = join(seq_root, 'Camera' + str(cid))
